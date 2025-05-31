@@ -36,3 +36,10 @@ Thumbs.db
 
 # === Archivos de test/instrumentación (si no deseas trackear resultados) ===
 test-results/
+
+# Google Services
+/app/google-services.json
+
+# Keystore files
+*.jks
+*.keystore
