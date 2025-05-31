@@ -166,3 +166,31 @@ Se ha configurado el archivo de credenciales de Google Services (google-services
 - Nunca debe ser compartido o expuesto públicamente
 - Cada desarrollador del equipo debe obtener sus propias credenciales para desarrollo
 - Para producción, se utilizará un archivo diferente con credenciales específicas 
+
+### 2024-03-19 - Correcciones y Mejoras en la Estructura Base
+**Tipo:** Avance/Corrección
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se realizaron correcciones y mejoras en la estructura base del proyecto, principalmente enfocadas en el AndroidManifest.xml y la implementación básica de la UI con Jetpack Compose.
+
+**Detalles técnicos:**
+1. Correcciones en AndroidManifest.xml:
+   - Reorganización correcta de la estructura del manifest
+   - Colocación apropiada de la activity dentro del tag application
+   - Configuración adecuada de la activity principal como LAUNCHER
+
+2. Mejoras en MainActivity:
+   - Implementación de tema básico con Material3
+   - Estructura base usando Jetpack Compose
+   - Pantalla de bienvenida simple con diseño centrado
+
+**Siguientes pasos:**
+1. Implementar la navegación básica entre pantallas
+2. Crear los componentes base de UI reutilizables
+3. Comenzar con la implementación de la autenticación de Google
+
+**Notas adicionales:**
+- Se resolvieron problemas con el daemon de Kotlin durante la compilación
+- La aplicación ahora compila y ejecuta correctamente
+- La UI base está lista para expandirse con más funcionalidades 
