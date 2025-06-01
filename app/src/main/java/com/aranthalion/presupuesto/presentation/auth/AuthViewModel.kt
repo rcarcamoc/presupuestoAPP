@@ -24,12 +24,26 @@ class AuthViewModel @Inject constructor(
     private val _userEmail = MutableStateFlow<String?>(null)
     val userEmail: StateFlow<String?> = _userEmail
     
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName
+    
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
+    
+    init {
+        // Verificar si hay una sesión activa al iniciar
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        account?.let {
+            _userEmail.value = it.email
+            _userName.value = it.displayName
+            AppLogger.i("Sesión existente encontrada: ${it.email}")
+        }
+    }
     
     fun getSignInClient(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
+            .requestProfile()
             .build()
         
         return GoogleSignIn.getClient(context, gso)
@@ -45,6 +59,7 @@ class AuthViewModel @Inject constructor(
             try {
                 AppLogger.i("Usuario autenticado: ${account.email}")
                 _userEmail.value = account.email
+                _userName.value = account.displayName
             } catch (e: Exception) {
                 AppLogger.e("Error al procesar el inicio de sesión", e)
                 _error.value = "Error al procesar el inicio de sesión: ${e.message}"
@@ -57,6 +72,7 @@ class AuthViewModel @Inject constructor(
             try {
                 getSignInClient().signOut()
                 _userEmail.value = null
+                _userName.value = null
                 AppLogger.i("Usuario cerrado sesión")
             } catch (e: Exception) {
                 AppLogger.e("Error al cerrar sesión", e)

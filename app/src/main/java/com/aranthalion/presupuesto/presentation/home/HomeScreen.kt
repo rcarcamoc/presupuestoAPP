@@ -15,6 +15,7 @@ fun HomeScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val userEmail by viewModel.userEmail.collectAsState()
+    val userName by viewModel.userName.collectAsState()
     
     LaunchedEffect(Unit) {
         AppLogger.d("HomeScreen launched")
@@ -29,8 +30,13 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Bienvenido: ${userEmail ?: "Usuario"}",
+                text = "Bienvenido: ${userName ?: "Usuario"}",
                 style = MaterialTheme.typography.headlineMedium
+            )
+            
+            Text(
+                text = "Correo: ${userEmail ?: "No disponible"}",
+                style = MaterialTheme.typography.bodyLarge
             )
             
             Button(
