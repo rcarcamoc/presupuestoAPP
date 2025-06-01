@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -34,6 +35,7 @@ android {
             )
         }
         debug {
+            isMinifyEnabled = false
             firebaseAppDistribution {
                 artifactType = "APK"
                 testers = "rcarcamoc@gmail.com"
@@ -53,6 +55,7 @@ android {
     
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     
     composeOptions {
@@ -71,6 +74,12 @@ android {
             excludes += "META-INF/notice.txt"
             excludes += "META-INF/ASL2.0"
             excludes += "META-INF/*.kotlin_module"
+            pickFirsts += "META-INF/jersey-module-version"
+            pickFirsts += "META-INF/NOTICE.txt"
+            pickFirsts += "META-INF/LICENSE.txt"
+            pickFirsts += "META-INF/DEPENDENCIES"
+            pickFirsts += "META-INF/ASL2.0"
+            pickFirsts += "META-INF/INDEX.LIST"
         }
     }
 }
@@ -86,6 +95,12 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
+    
+    // Logging & Analytics
+    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
     
     // Compose
     implementation("androidx.compose.ui:ui")
@@ -110,12 +125,20 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
     // Firebase/Google Services
-    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
-    implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.api-client:google-api-client-android:2.2.0")
-    implementation("com.google.apis:google-api-services-gmail:v1-rev20220404-2.0.0")
-    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
+    implementation("com.google.android.gms:play-services-base:18.3.0")
+    implementation("com.google.android.gms:play-services-identity:18.0.1")
+    implementation("com.google.api-client:google-api-client-android:2.2.0") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+    implementation("com.google.apis:google-api-services-gmail:v1-rev20220404-2.0.0") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
+        exclude(group = "org.apache.httpcomponents")
+    }
+    implementation("com.google.http-client:google-http-client-android:1.43.3")
+    implementation("com.google.oauth-client:google-oauth-client:1.34.1")
     
     // Kotlin Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")

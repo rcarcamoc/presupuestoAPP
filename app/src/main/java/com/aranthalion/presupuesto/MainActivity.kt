@@ -3,22 +3,22 @@ package com.aranthalion.presupuesto
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.aranthalion.presupuesto.presentation.auth.AuthViewModel
 import com.aranthalion.presupuesto.presentation.auth.LoginScreen
-import com.aranthalion.presupuesto.presentation.transaction.TransactionScreen
+import com.aranthalion.presupuesto.presentation.home.HomeScreen
 import com.aranthalion.presupuesto.ui.theme.PresupuestoTheme
-import com.aranthalion.presupuesto.ui.theme.spacing
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -30,18 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: AuthViewModel = hiltViewModel()
-                    var isLoggedIn by remember { mutableStateOf(viewModel.isUserSignedIn()) }
-
-                    if (isLoggedIn) {
-                        TransactionScreen()
-                    } else {
-                        LoginScreen(
-                            onLoginSuccess = {
-                                isLoggedIn = true
-                            }
-                        )
-                    }
+                    AppNavigation()
                 }
             }
         }
@@ -49,27 +38,24 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
-    onLogout: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "¡Hola!\nBienvenido a PersonalBudget",
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center
-        )
+fun AppNavigation() {
+    val navController = rememberNavController()
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val userEmail by authViewModel.userEmail.collectAsState()
+    
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
         
-        Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
-        
-        Button(
-            onClick = onLogout
-        ) {
-            Text("Cerrar sesión")
+        composable("home") {
+            HomeScreen()
         }
     }
 } 
