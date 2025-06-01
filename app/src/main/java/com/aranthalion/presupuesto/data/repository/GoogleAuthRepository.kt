@@ -65,7 +65,7 @@ class GoogleAuthRepository @Inject constructor(
             Log.d(TAG, "Handling sign in result for account: ${account.email}")
             if (account.idToken == null || account.serverAuthCode == null) {
                 Log.e(TAG, "Missing token or auth code")
-                googleSignInClient.signOut().await()
+        googleSignInClient.signOut().await()
                 throw Exception("No se obtuvieron los permisos necesarios. Por favor, inténtalo de nuevo.")
             }
             Log.d(TAG, "Sign in successful with token and auth code")

@@ -18,12 +18,22 @@ import com.aranthalion.presupuesto.presentation.auth.AuthViewModel
 import com.aranthalion.presupuesto.presentation.auth.LoginScreen
 import com.aranthalion.presupuesto.presentation.home.HomeScreen
 import com.aranthalion.presupuesto.ui.theme.PresupuestoTheme
+import com.aranthalion.presupuesto.util.AnalyticsLogger
+import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    @Inject
+    lateinit var analytics: FirebaseAnalytics
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        AnalyticsLogger.init(analytics)
+        
         setContent {
             PresupuestoTheme {
                 Surface(
@@ -46,7 +56,7 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
             LoginScreen(
-                onLoginSuccess = {
+                onNavigateToHome = {
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }

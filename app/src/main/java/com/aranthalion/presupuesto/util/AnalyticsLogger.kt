@@ -1,26 +1,29 @@
 package com.aranthalion.presupuesto.util
 
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
 import timber.log.Timber
 
 object AnalyticsLogger {
-    private var firebaseAnalytics: FirebaseAnalytics? = null
+    private val analytics: FirebaseAnalytics = Firebase.analytics
 
     fun init(analytics: FirebaseAnalytics) {
-        firebaseAnalytics = analytics
+        // Este método ya no se usa en la nueva implementación
     }
 
     fun logEvent(eventName: String, params: Map<String, Any> = emptyMap()) {
         Timber.i("EVENT: $eventName - $params")
         
-        firebaseAnalytics?.logEvent(eventName) {
+        analytics.logEvent(eventName) {
             params.forEach { (key, value) ->
                 when (value) {
                     is String -> param(key, value)
                     is Long -> param(key, value)
                     is Double -> param(key, value)
+                    is Int -> param(key, value.toLong())
                     is Boolean -> param(key, value.toString())
                     else -> param(key, value.toString())
                 }
@@ -36,7 +39,9 @@ object AnalyticsLogger {
     }
 
     fun logScreenView(screenName: String) {
-        logEvent("screen_view", mapOf("screen_name" to screenName))
+        analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+            param(FirebaseAnalytics.Param.SCREEN_NAME, screenName)
+        }
     }
 
     fun logError(errorType: String, errorMessage: String, throwable: Throwable? = null) {
@@ -66,6 +71,13 @@ object AnalyticsLogger {
         
         deviceInfo.forEach { (key, value) ->
             FirebaseCrashlytics.getInstance().setCustomKey(key, value)
+        }
+    }
+
+    fun logLoginEvent(success: Boolean, method: String) {
+        analytics.logEvent(FirebaseAnalytics.Event.LOGIN) {
+            param(FirebaseAnalytics.Param.SUCCESS, success.toString())
+            param(FirebaseAnalytics.Param.METHOD, method)
         }
     }
 } 

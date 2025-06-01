@@ -1,5 +1,20 @@
 # Log de Desarrollo - PresupuestoAPP
 
+## 2024-06-01
+- Continuación de implementación de autenticación con Google.
+- Implementación de `rememberLauncherForActivityResult` en `LoginScreen.kt` para manejar el resultado del inicio de sesión de Google, solucionando problema de "pantalla de carga infinita".
+- Aislamiento del problema con el scope `GmailScopes.GMAIL_READONLY`:
+  - La aplicación funciona correctamente con scopes básicos (`email`, `profile`, `openid`).
+  - El error 403 (access_denied) aparece consistentemente al intentar solicitar `GmailScopes.GMAIL_READONLY`.
+  - Se verificó que la pantalla de consentimiento para Gmail no aparece antes del error 403.
+- Múltiples revisiones de configuración en Google Cloud Console:
+  - Verificación de habilitación de Gmail API.
+  - Verificación de Pantalla de Consentimiento OAuth (scopes, usuarios de prueba, estado de publicación).
+  - Verificación de Credenciales del ID de cliente OAuth tipo Android (nombre de paquete, SHA-1).
+  - Verificación y discusión sobre el ID de cliente correcto a utilizar (Android vs. Web).
+- Análisis de logs de `logcat` que muestran `NEED_REMOTE_CONSENT` para los scopes solicitados, pero resultan en error 403.
+- Problema con `gmail.readonly` pendiente de resolución.
+
 ## 2024-03-19
 - Implementación de autenticación con Google
   - Configuración inicial de Firebase y Google Sign-In
@@ -10,6 +25,9 @@
   - Implementación de cierre de sesión
   - Configuración de Crashlytics para monitoreo de errores
   - Implementación de sistema de logging mejorado
+  - Implementación del scope openid para obtener ID único del usuario
+    * Visualización del ID de Google en la pantalla de bienvenida
+    * Preparación para futura integración con backend
 
 ## 2024-03-18
 - Configuración inicial del proyecto

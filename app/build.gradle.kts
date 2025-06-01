@@ -102,6 +102,12 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
     
+    // Gmail API
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.api-client:google-api-client-android:2.2.0")
+    implementation("com.google.apis:google-api-services-gmail:v1-rev20220404-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.19.0")
+    
     // Compose
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
@@ -125,13 +131,9 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
     // Firebase/Google Services
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.android.gms:play-services-base:18.3.0")
     implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.api-client:google-api-client-android:2.2.0") {
-        exclude(group = "org.apache.httpcomponents")
-    }
-    implementation("com.google.apis:google-api-services-gmail:v1-rev20220404-2.0.0") {
         exclude(group = "org.apache.httpcomponents")
     }
     implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
