@@ -410,3 +410,38 @@ Se ha mejorado el script `compile.sh` para incluir una limpieza automática de G
 **Siguientes pasos:**
 1. Monitorear el impacto en el tiempo de compilación
 2. Considerar agregar más opciones de limpieza si es necesario 
+
+### 2024-03-19 - Optimización del Script de Compilación
+**Tipo:** Mejora
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se ha optimizado el script `compile.sh` para mejorar la gestión de daemons y automatizar la instalación en dispositivos.
+
+**Detalles técnicos:**
+1. Gestión inteligente de Gradle Daemons:
+   - Verificación del número de daemons activos
+   - Solo detiene daemons si hay más de uno activo
+   - Mantiene un daemon para mejorar el rendimiento de compilaciones subsecuentes
+
+2. Instalación automática:
+   - Detección automática de dispositivos Android conectados
+   - Instalación de la APK después de una compilación exitosa
+   - Lanzamiento automático de la aplicación
+   - Manejo de errores y mensajes informativos
+
+3. Optimización de limpieza:
+   - Limpieza selectiva de archivos temporales
+   - Preservación de la caché de Gradle
+   - Mantenimiento del daemon activo
+
+**Beneficios:**
+- Reducción del tiempo de compilación
+- Proceso de prueba más eficiente
+- Mejor experiencia de desarrollo
+- Gestión optimizada de recursos
+
+**Siguientes pasos:**
+1. Monitorear el rendimiento del script en uso diario
+2. Considerar agregar opciones de compilación personalizadas
+3. Evaluar la necesidad de flags adicionales para debug/release 
