@@ -194,3 +194,176 @@ Se realizaron correcciones y mejoras en la estructura base del proyecto, princip
 - Se resolvieron problemas con el daemon de Kotlin durante la compilación
 - La aplicación ahora compila y ejecuta correctamente
 - La UI base está lista para expandirse con más funcionalidades 
+
+## 01/06/2024 - Optimización de la Compilación
+
+### Cambios Realizados:
+- Optimización de la configuración de Gradle para mejorar el rendimiento
+- Ajuste de parámetros de memoria y JVM en `gradle.properties`
+- Implementación de scripts de compilación multiplataforma (Windows/Linux)
+- Gestión automática de Gradle Daemons para evitar conflictos
+
+### Configuraciones Actualizadas:
+- Memoria JVM: 4GB
+- Compilación paralela habilitada
+- Caché de Gradle activada
+- Compilación incremental para Kotlin
+- Gestión optimizada de Gradle Daemons
+
+### Próximos Pasos:
+- Monitorear el rendimiento de la compilación
+- Ajustar parámetros según sea necesario
+- Verificar compatibilidad multiplataforma 
+
+### 01/06/2024 - Resultados de Compilación y Warnings
+
+**Tipo:** Seguimiento
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se realizó una compilación exitosa del proyecto con las nuevas optimizaciones de Gradle.
+
+**Detalles técnicos:**
+1. Tiempo de compilación: 11m 17s
+2. Tareas ejecutadas: 38 (24 ejecutadas, 14 desde caché)
+3. Warnings detectados:
+   - Parámetro no utilizado 'viewModel' en MainActivity.kt
+   - Variable no utilizada 'context' en LoginScreen.kt
+4. Advertencias de Gradle:
+   - Algunas características usadas serán incompatibles con Gradle 9.0
+
+**Siguientes pasos:**
+1. Revisar y limpiar código no utilizado:
+   - Eliminar o utilizar el parámetro 'viewModel' en MainActivity
+   - Revisar la necesidad de la variable 'context' en LoginScreen
+2. Investigar y planificar la compatibilidad con Gradle 9.0
+3. Considerar la optimización del tiempo de compilación 
+
+### 01/06/2024 - Configuración de OAuth y Scopes de Google
+
+**Tipo:** Configuración/Corrección
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se identificó la necesidad de configurar correctamente la pantalla de consentimiento de OAuth y los scopes necesarios para la aplicación.
+
+**Detalles técnicos:**
+1. Scopes requeridos:
+   ```
+   https://www.googleapis.com/auth/userinfo.email
+   https://www.googleapis.com/auth/gmail.labels
+   https://www.googleapis.com/auth/gmail.readonly
+   openid
+   https://www.googleapis.com/auth/userinfo.profile
+   ```
+
+2. Client ID actual:
+   `518608700754-qct62b37clhd148v9r42tpeaan079trj.apps.googleusercontent.com`
+
+**Pasos de configuración necesarios:**
+1. En Google Cloud Console:
+   - Acceder a "OAuth consent screen"
+   - Configurar la aplicación en modo "Testing"
+   - Agregar usuarios de prueba (aranthalion@gmail.com)
+   - Verificar que todos los scopes estén listados y aprobados
+
+2. En la sección de credenciales:
+   - Verificar la configuración del cliente OAuth
+   - Asegurar que el package name y SHA-1 coincidan
+   - Confirmar que los scopes estén correctamente asociados
+
+**Siguientes pasos:**
+1. Completar la configuración de la pantalla de consentimiento
+2. Verificar la funcionalidad de login con usuario de prueba
+3. Planificar el proceso de verificación para producción 
+
+### 01/06/2024 - Corrección de Autenticación Google OAuth
+
+**Tipo:** Corrección
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se corrigió la implementación de Google Sign-In para incluir todos los scopes necesarios y la configuración correcta del client_id.
+
+**Detalles técnicos:**
+1. Scopes implementados:
+   ```kotlin
+   .requestEmail()
+   .requestProfile()
+   .requestId()
+   .requestScopes(
+       Scope(GmailScopes.GMAIL_READONLY),
+       Scope(GmailScopes.GMAIL_LABELS),
+       Scope("openid"),
+       Scope("https://www.googleapis.com/auth/userinfo.email"),
+       Scope("https://www.googleapis.com/auth/userinfo.profile")
+   )
+   ```
+
+2. Configuración mejorada:
+   - Uso correcto del client_id desde strings.xml
+   - Implementación de requestServerAuthCode
+   - Integración completa con los permisos de Gmail
+
+**Estado:**
+- ✅ Autenticación funcionando correctamente
+- ✅ Pantalla de consentimiento mostrando todos los permisos
+- ✅ Acceso a Gmail habilitado para futuras funcionalidades
+
+**Siguientes pasos:**
+1. Implementar la lectura de correos de Gmail
+2. Desarrollar el parser de correos bancarios
+3. Configurar el WorkManager para sincronización periódica 
+
+### 2024-03-19 - Actualización: Renombrado del Script de Compilación
+**Tipo:** Mejora
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se ha renombrado el script de automatización de `build.sh` a `compile.sh` para mejor claridad en español.
+
+**Detalles técnicos:**
+1. Cambios realizados:
+   - Renombrado del script principal a `compile.sh`
+   - Mantenidas todas las funcionalidades:
+     * Compilación del proyecto
+     * Limpieza automática post-compilación
+     * Detención de daemons
+     * Limpieza de caché
+   - Permisos de ejecución reconfigurados
+
+**Uso:**
+```bash
+./compile.sh
+```
+
+**Siguientes pasos:**
+1. Verificar que el nuevo nombre del script esté documentado en todos los lugares relevantes
+2. Actualizar cualquier referencia al script en la documentación del proyecto 
+
+### 2024-03-19 - Mejora del Script de Compilación
+**Tipo:** Mejora
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se ha mejorado el script `compile.sh` para incluir una limpieza automática de Gradle después de cada compilación exitosa.
+
+**Detalles técnicos:**
+1. Mejoras implementadas:
+   - Limpieza de daemons de Gradle antes de compilar
+   - Limpieza post-compilación de:
+     * Daemons de Gradle
+     * Directorio `.gradle/`
+     * Directorios `build/`
+     * Directorio `app/build/`
+   - La limpieza solo se ejecuta si la compilación es exitosa
+
+**Beneficios:**
+- Previene la acumulación de archivos temporales
+- Mantiene el espacio en disco optimizado
+- Reduce problemas potenciales de caché
+- Mejora la consistencia entre compilaciones
+
+**Siguientes pasos:**
+1. Monitorear el impacto en el tiempo de compilación
+2. Considerar agregar más opciones de limpieza si es necesario 
