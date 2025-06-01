@@ -1,4 +1,23 @@
-# Log de Desarrollo - PersonalBudget App
+# Log de Desarrollo - PresupuestoAPP
+
+## 2024-03-19
+- Implementación de autenticación con Google
+  - Configuración inicial de Firebase y Google Sign-In
+  - Creación de pantalla de login con botón de Google
+  - Implementación de AuthViewModel para manejar la autenticación
+  - Creación de pantalla de bienvenida con datos del usuario
+  - Visualización del nombre y correo del usuario autenticado
+  - Implementación de cierre de sesión
+  - Configuración de Crashlytics para monitoreo de errores
+  - Implementación de sistema de logging mejorado
+
+## 2024-03-18
+- Configuración inicial del proyecto
+  - Creación del proyecto con Jetpack Compose
+  - Configuración de Hilt para inyección de dependencias
+  - Implementación de navegación básica
+  - Configuración de Material3 y tema personalizado
+  - Implementación de sistema de logging básico
 
 Este documento registra el progreso, decisiones importantes y descubrimientos durante el desarrollo de la aplicación PersonalBudget.
 
