@@ -195,6 +195,49 @@ Se realizaron correcciones y mejoras en la estructura base del proyecto, princip
 - La aplicación ahora compila y ejecuta correctamente
 - La UI base está lista para expandirse con más funcionalidades 
 
+### 2024-03-19 - Implementación de Clean Architecture y Módulo de Transacciones
+**Tipo:** Avance
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se ha implementado la estructura base del proyecto siguiendo Clean Architecture y se ha creado el primer módulo funcional para el manejo de transacciones.
+
+**Detalles técnicos:**
+1. Estructura Clean Architecture implementada:
+   - Domain Layer:
+     * Modelo `Transaction` con tipos y fuentes
+     * Interfaz `TransactionRepository`
+   - Data Layer:
+     * Base de datos Room con `TransactionEntity` y `TransactionDao`
+     * Implementación de `TransactionRepositoryImpl`
+   - Presentation Layer:
+     * `TransactionViewModel` para la lógica de presentación
+     * `TransactionScreen` con Compose UI
+     * Diálogo de agregar transacción
+
+2. Configuración de inyección de dependencias:
+   - Módulo de base de datos con Hilt
+   - Módulo de repositorios
+   - Vinculación de implementaciones
+
+3. Funcionalidades implementadas:
+   - Visualización de lista de transacciones
+   - Formulario para agregar nuevas transacciones
+   - Persistencia local con Room
+   - Manejo de estados con StateFlow
+
+**Estado actual:**
+- ✅ Estructura Clean Architecture establecida
+- ✅ Base de datos local configurada
+- ✅ UI básica implementada
+- ✅ Inyección de dependencias configurada
+
+**Siguientes pasos:**
+1. Implementar pruebas unitarias para el repositorio y ViewModel
+2. Agregar validaciones en el formulario de transacciones
+3. Mejorar el diseño de la UI siguiendo Material Design 3
+4. Comenzar con la integración de Gmail API
+
 ## 01/06/2024 - Optimización de la Compilación
 
 ### Cambios Realizados:

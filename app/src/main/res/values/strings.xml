@@ -1,3 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PresupuestoAPP</string>
+    <string name="server_client_id">859610950751-kk6r2iii10dffn52eb6he5q743go37bu.apps.googleusercontent.com</string>
+    <string name="google_sign_in_error">Error al iniciar sesión con Google</string>
+    <string name="google_sign_in_success">Inicio de sesión exitoso</string>
+    <string name="google_sign_out_success">Sesión cerrada exitosamente</string>
+    <string name="google_sign_in_cancelled">Inicio de sesión cancelado</string>
 </resources>

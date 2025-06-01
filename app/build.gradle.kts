@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.gms.google-services")
+    id("com.google.firebase.appdistribution")
 }
 
 android {
@@ -31,6 +32,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            firebaseAppDistribution {
+                artifactType = "APK"
+                testers = "rcarcamoc@gmail.com"
+                releaseNotes = "Versión de prueba con autenticación de Google implementada"
+            }
         }
     }
     
