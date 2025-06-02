@@ -11,7 +11,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
-import com.google.api.services.gmail.GmailScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,9 +32,6 @@ class AuthViewModel @Inject constructor(
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
     
-    private val _gmailAccessToken = MutableStateFlow<String?>(null)
-    val gmailAccessToken: StateFlow<String?> = _gmailAccessToken
-    
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
     
@@ -47,12 +43,6 @@ class AuthViewModel @Inject constructor(
             _userName.value = it.displayName
             _userId.value = it.id
             AppLogger.i("Sesión existente encontrada: ${it.email}")
-            
-            // Verificar si tenemos acceso a Gmail
-            if (it.grantedScopes.contains(Scope(GmailScopes.GMAIL_READONLY))) {
-                AppLogger.i("Acceso a Gmail ya concedido")
-                _gmailAccessToken.value = "Acceso concedido"
-            }
         }
     }
     
@@ -61,7 +51,6 @@ class AuthViewModel @Inject constructor(
             .requestEmail()
             .requestProfile()
             .requestId()
-            // .requestScopes(Scope(GmailScopes.GMAIL_READONLY)) // Definitivamente comentado/deshabilitado
             .build()
         
         return GoogleSignIn.getClient(context, gso)
@@ -79,15 +68,6 @@ class AuthViewModel @Inject constructor(
                 _userEmail.value = account.email
                 _userName.value = account.displayName
                 _userId.value = account.id
-                
-                // Verificar acceso a Gmail
-                if (account.grantedScopes.contains(Scope(GmailScopes.GMAIL_READONLY))) {
-                    AppLogger.i("Acceso a Gmail concedido")
-                    _gmailAccessToken.value = "Acceso concedido"
-                } else {
-                    AppLogger.w("Acceso a Gmail no concedido")
-                    _gmailAccessToken.value = "Acceso no concedido"
-                }
                 
                 // Obtener el token ID
                 account.idToken?.let { token ->
@@ -110,7 +90,6 @@ class AuthViewModel @Inject constructor(
                     _userEmail.value = null
                     _userName.value = null
                     _userId.value = null
-                    _gmailAccessToken.value = null
                     AppLogger.i("Usuario cerrado sesión y acceso revocado")
                 }
             } catch (e: Exception) {

@@ -74,6 +74,8 @@ android {
             excludes += "META-INF/notice.txt"
             excludes += "META-INF/ASL2.0"
             excludes += "META-INF/*.kotlin_module"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/NOTICE.md"
             pickFirsts += "META-INF/jersey-module-version"
             pickFirsts += "META-INF/NOTICE.txt"
             pickFirsts += "META-INF/LICENSE.txt"

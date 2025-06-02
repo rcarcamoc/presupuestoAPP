@@ -18,7 +18,6 @@ fun HomeScreen(
     val userEmail by viewModel.userEmail.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val userId by viewModel.userId.collectAsState()
-    val gmailAccess by viewModel.gmailAccessToken.collectAsState()
     
     LaunchedEffect(Unit) {
         AppLogger.d("HomeScreen launched")
@@ -45,15 +44,6 @@ fun HomeScreen(
             Text(
                 text = "ID: ${userId ?: "No disponible"}",
                 style = MaterialTheme.typography.bodyMedium
-            )
-            
-            Text(
-                text = "Acceso Gmail: ${gmailAccess ?: "No disponible"}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (gmailAccess == "Acceso concedido") 
-                    MaterialTheme.colorScheme.primary 
-                else 
-                    MaterialTheme.colorScheme.error
             )
             
             Button(
