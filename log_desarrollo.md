@@ -482,3 +482,18 @@ Se ha optimizado el script `compile.sh` para mejorar la gestión de daemons y au
 1. Monitorear el rendimiento del script en uso diario
 2. Considerar agregar opciones de compilación personalizadas
 3. Evaluar la necesidad de flags adicionales para debug/release 
+
+### Actualizaciones Recientes (Distribución y Correcciones)
+
+*   **Firebase App Distribution:**
+    *   Configuración completa para distribuir APKs a testers.
+    *   Solución de problemas de credenciales y rutas de archivos para la subida.
+    *   Actualización de la lista de testers.
+*   **Script de Compilación (`compile.bat`):**
+    *   Corrección de errores de ejecución y restauración de su funcionalidad.
+    *   Integración del paso de distribución a Firebase App Distribution.
+*   **Login de Google:**
+    *   Eliminación del scope `GMAIL_READONLY` según requerimientos.
+    *   Refactorización del `GoogleAuthRepository` y `AuthViewModel` para un manejo más robusto de la autenticación y los errores.
+*   **Configuración de Gradle:**
+    *   Ajustes en `build.gradle.kts` y `settings.gradle.kts` para la correcta definición de repositorios y plugins (Crashlytics, App Distribution). 
