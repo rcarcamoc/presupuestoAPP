@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aranthalion.presupuesto.presentation.auth.AuthViewModel
 import com.aranthalion.presupuesto.presentation.auth.LoginScreen
+import com.aranthalion.presupuesto.presentation.email.EmailConfigScreen
 import com.aranthalion.presupuesto.presentation.home.HomeScreen
 import com.aranthalion.presupuesto.ui.theme.PresupuestoTheme
 import com.aranthalion.presupuesto.util.AnalyticsLogger
@@ -51,9 +52,10 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
-    val userEmail by authViewModel.userEmail.collectAsState()
     
-    NavHost(navController = navController, startDestination = "login") {
+    val startDestination = if (authViewModel.isUserSignedIn()) "home" else "login"
+
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("login") {
             LoginScreen(
                 onNavigateToHome = {
@@ -65,7 +67,11 @@ fun AppNavigation() {
         }
         
         composable("home") {
-            HomeScreen()
+            HomeScreen(onNavigateToEmailConfig = { navController.navigate("email_config") })
+        }
+        
+        composable("email_config") {
+            EmailConfigScreen()
         }
     }
 } 

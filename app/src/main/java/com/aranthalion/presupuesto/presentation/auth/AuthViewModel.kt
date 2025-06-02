@@ -61,7 +61,7 @@ class AuthViewModel @Inject constructor(
             .requestEmail()
             .requestProfile()
             .requestId()
-            .requestScopes(Scope(GmailScopes.GMAIL_READONLY))
+            // .requestScopes(Scope(GmailScopes.GMAIL_READONLY)) // Definitivamente comentado/deshabilitado
             .build()
         
         return GoogleSignIn.getClient(context, gso)

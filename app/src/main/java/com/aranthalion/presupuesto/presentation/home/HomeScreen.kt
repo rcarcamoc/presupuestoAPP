@@ -12,6 +12,7 @@ import com.aranthalion.presupuesto.util.AppLogger
 
 @Composable
 fun HomeScreen(
+    onNavigateToEmailConfig: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val userEmail by viewModel.userEmail.collectAsState()
@@ -54,6 +55,12 @@ fun HomeScreen(
                 else 
                     MaterialTheme.colorScheme.error
             )
+            
+            Button(
+                onClick = onNavigateToEmailConfig
+            ) {
+                Text("Configurar Acceso Email (IMAP/POP3)")
+            }
             
             Button(
                 onClick = {
