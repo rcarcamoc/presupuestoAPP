@@ -45,15 +45,18 @@ class EmailConnectViewModel : ViewModel() {
     val saveStatus: StateFlow<String?> = _saveStatus
 
     fun onProtocolSelected(protocol: String) {
+        AppLogger.d("EmailConnectViewModel: onProtocolSelected, protocol: $protocol")
         _selectedProtocol.value = protocol
         _selectedProvider.value?.let { updateFieldsFromProvider(it, protocol) }
     }
 
     fun onServerChanged(newServer: String) {
+        AppLogger.d("EmailConnectViewModel: onServerChanged, newServer: $newServer")
         _server.value = newServer
     }
 
     fun onPortChanged(newPort: String) {
+        AppLogger.d("EmailConnectViewModel: onPortChanged, newPort: $newPort")
         _port.value = newPort
     }
 
@@ -66,11 +69,13 @@ class EmailConnectViewModel : ViewModel() {
     }
 
     fun onProviderSelected(provider: EmailProvider?) {
+        AppLogger.d("EmailConnectViewModel: onProviderSelected, provider: ${provider?.name ?: "null"}")
         _selectedProvider.value = provider
         provider?.let { updateFieldsFromProvider(it, _selectedProtocol.value) }
     }
 
     private fun updateFieldsFromProvider(provider: EmailProvider, protocol: String) {
+        AppLogger.d("EmailConnectViewModel: updateFieldsFromProvider, provider: ${provider.name}, protocol: $protocol")
         if (protocol == "IMAP") {
             _server.value = provider.imapServer
             _port.value = provider.imapPort.toString()

@@ -1,5 +1,6 @@
 package com.aranthalion.presupuesto.presentation.email
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -64,7 +65,10 @@ fun EmailConnectScreen(viewModel: EmailConnectViewModel = viewModel()) {
 
             // Selector de Proveedor
             OutlinedButton(
-                onClick = { showProviderDialog = true },
+                onClick = {
+                    Log.d("EmailConnectScreen", "Selector de Proveedor - onClick")
+                    showProviderDialog = true
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(selectedProvider?.name ?: "Seleccionar Proveedor (Opcional)")
@@ -73,12 +77,16 @@ fun EmailConnectScreen(viewModel: EmailConnectViewModel = viewModel()) {
 
             if (showProviderDialog) {
                 AlertDialog(
-                    onDismissRequest = { showProviderDialog = false },
+                    onDismissRequest = {
+                        Log.d("EmailConnectScreen", "AlertDialog - onDismissRequest")
+                        showProviderDialog = false
+                    },
                     title = { Text("Seleccionar Proveedor") },
                     text = {
                         LazyColumn {
                             items(items = emailProviders) { provider ->
                                 TextButton(onClick = {
+                                    Log.d("EmailConnectScreen", "Proveedor seleccionado del diálogo: ${provider.name}")
                                     viewModel.onProviderSelected(provider)
                                     showProviderDialog = false
                                 }) {
@@ -88,7 +96,10 @@ fun EmailConnectScreen(viewModel: EmailConnectViewModel = viewModel()) {
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = { showProviderDialog = false }) {
+                        TextButton(onClick = {
+                            Log.d("EmailConnectScreen", "AlertDialog - Cancelar clickeado")
+                            showProviderDialog = false
+                        }) {
                             Text("Cancelar")
                         }
                     }
@@ -98,10 +109,16 @@ fun EmailConnectScreen(viewModel: EmailConnectViewModel = viewModel()) {
             // Selector de Protocolo
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Protocolo: ")
-                RadioButton(selected = selectedProtocol == "IMAP", onClick = { viewModel.onProtocolSelected("IMAP") })
+                RadioButton(selected = selectedProtocol == "IMAP", onClick = {
+                    Log.d("EmailConnectScreen", "RadioButton IMAP - onClick")
+                    viewModel.onProtocolSelected("IMAP")
+                })
                 Text("IMAP")
                 Spacer(Modifier.width(8.dp))
-                RadioButton(selected = selectedProtocol == "POP3", onClick = { viewModel.onProtocolSelected("POP3") })
+                RadioButton(selected = selectedProtocol == "POP3", onClick = {
+                    Log.d("EmailConnectScreen", "RadioButton POP3 - onClick")
+                    viewModel.onProtocolSelected("POP3")
+                })
                 Text("POP3")
             }
 
