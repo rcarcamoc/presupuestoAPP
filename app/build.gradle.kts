@@ -38,8 +38,9 @@ android {
             isMinifyEnabled = false
             firebaseAppDistribution {
                 artifactType = "APK"
-                testers = "rcarcamoc@gmail.com"
-                releaseNotes = "Versión de prueba con autenticación de Google implementada"
+                testers = "aranthalion@gmail.com, ricardo.eric.carcamo@gmail.com"
+                releaseNotes = "Versión de prueba con autenticación de Google implementada y App Distribution configurada."
+                serviceCredentialsFile = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json").path
             }
         }
     }
@@ -81,6 +82,34 @@ android {
             pickFirsts += "META-INF/ASL2.0"
             pickFirsts += "META-INF/INDEX.LIST"
         }
+    }
+}
+
+// Tarea de diagnóstico actualizada
+tasks.register("checkServiceAccountFile") {
+    doLast {
+        println("Directorio actual de Gradle (root project): ${File(".").absolutePath}")
+        
+        val absolutePathString = "C:/registro/desarrollos/PresupuestoAPP/finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json"
+        val absoluteFile = File(absolutePathString)
+        println("Chequeando RUTA ABSOLUTA: ${absoluteFile.absolutePath}")
+        println("RUTA ABSOLUTA - Existe? ${absoluteFile.exists()}")
+        println("RUTA ABSOLUTA - Se puede leer? ${absoluteFile.canRead()}")
+
+        // Ahora probamos la ruta relativa como la usaríamos normalmente
+        // Asumimos que este build.gradle.kts está en el módulo 'app'
+        // y el archivo de credenciales está en la raíz del proyecto (un nivel arriba)
+        val relativePathString = "../finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json"
+        val relativeFile = project.file(relativePathString) // project.file() resuelve relativo al directorio del proyecto del módulo
+        println("Chequeando RUTA RELATIVA (desde 'app'): ${relativeFile.absolutePath}")
+        println("RUTA RELATIVA - Existe? ${relativeFile.exists()}")
+        println("RUTA RELATIVA - Se puede leer? ${relativeFile.canRead()}")
+
+        // Para doble chequear la ruta relativa desde la raíz
+        val relativeFileFromRoot = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json")
+        println("Chequeando RUTA RELATIVA (desde rootProject): ${relativeFileFromRoot.absolutePath}")
+        println("RUTA RELATIVA (desde rootProject) - Existe? ${relativeFileFromRoot.exists()}")
+        println("RUTA RELATIVA (desde rootProject) - Se puede leer? ${relativeFileFromRoot.canRead()}")
     }
 }
 

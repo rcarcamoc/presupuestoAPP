@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "859610950751",
+    "project_id": "finanzaspersonales-461602",
+    "storage_bucket": "finanzaspersonales-461602.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:859610950751:android:2e3f6e18278b9d44f7ffea",
+        "android_client_info": {
+          "package_name": "com.aranthalion.presupuesto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "859610950751-kk6r2iii10dffn52eb6he5q743go37bu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aranthalion.presupuesto",
+            "certificate_hash": "d5ee3c48e77879e7ad2e67d5109cadfc4fb91955"
+          }
+        },
+        {
+          "client_id": "859610950751-6i5him1fj9dr6191fh91djcafc828533.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBV_Yiru16-VGQ0BPPYV_IXQ_0Hg9hCK-4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "859610950751-6i5him1fj9dr6191fh91djcafc828533.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

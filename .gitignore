@@ -46,3 +46,6 @@ test-results/
 # Keystore files
 *.jks
 *.keystore
+
+# Firebase Service Account Credentials
+/finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json

@@ -55,7 +55,7 @@ echo [INFO] Subiendo APK a GitHub...
 git diff --quiet "%APK_DEST%" 2>nul
 if !errorlevel! equ 0 (
     echo [INFO] No hay cambios en el APK, omitiendo subida a GitHub
-    goto :end
+    goto :firebase_distribution
 )
 
 :: Agregar APK al staging
@@ -86,7 +86,16 @@ if !errorlevel! neq 0 (
 
 echo [INFO] APK subida exitosamente a GitHub
 
-:end
+:firebase_distribution
+:: Distribuir a Firebase
+echo [INFO] Distribuyendo APK a Firebase App Distribution...
+call gradlew appDistributionUploadDebug
+if !errorlevel! neq 0 (
+    echo [ERROR] Error al distribuir el APK a Firebase
+    exit /b 1
+)
+echo [INFO] APK distribuida exitosamente a Firebase App Distribution
+
 echo [DEBUG] ===== FIN COMPILACIÓN =====
 echo [INFO] Proceso completado exitosamente
 
