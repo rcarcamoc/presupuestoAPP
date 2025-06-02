@@ -17,7 +17,7 @@ fun HomeScreen(
     val userEmail by viewModel.userEmail.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val userId by viewModel.userId.collectAsState()
-    val gmailAccess by viewModel.gmailAccessToken.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     
     LaunchedEffect(Unit) {
         AppLogger.d("HomeScreen launched")
@@ -27,41 +27,36 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = "Bienvenido: ${userName ?: "Usuario"}",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            
-            Text(
-                text = "Correo: ${userEmail ?: "No disponible"}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            
-            Text(
-                text = "ID: ${userId ?: "No disponible"}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            
-            Text(
-                text = "Acceso Gmail: ${gmailAccess ?: "No disponible"}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (gmailAccess == "Acceso concedido") 
-                    MaterialTheme.colorScheme.primary 
-                else 
-                    MaterialTheme.colorScheme.error
-            )
-            
-            Button(
-                onClick = {
-                    AppLogger.d("Botón de cerrar sesión presionado")
-                    viewModel.signOut()
-                }
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Cerrar sesión")
+                Text(
+                    text = "Bienvenido: ${userName ?: "Usuario"}",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                
+                Text(
+                    text = "Correo: ${userEmail ?: "No disponible"}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                
+                Text(
+                    text = "ID: ${userId ?: "No disponible"}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Button(
+                    onClick = {
+                        AppLogger.d("Botón de cerrar sesión presionado")
+                        viewModel.signOut()
+                    }
+                ) {
+                    Text("Cerrar sesión")
+                }
             }
         }
     }

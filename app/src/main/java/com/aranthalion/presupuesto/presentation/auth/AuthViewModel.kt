@@ -1,19 +1,12 @@
 package com.aranthalion.presupuesto.presentation.auth
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aranthalion.presupuesto.R
+import com.aranthalion.presupuesto.data.repository.GoogleAuthRepository
 import com.aranthalion.presupuesto.util.AppLogger
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Scope
-import com.google.api.services.gmail.GmailScopes
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val googleAuthRepository: GoogleAuthRepository
 ) : ViewModel() {
     
     private val _userEmail = MutableStateFlow<String?>(null)
@@ -33,69 +26,56 @@ class AuthViewModel @Inject constructor(
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
     
-    private val _gmailAccessToken = MutableStateFlow<String?>(null)
-    val gmailAccessToken: StateFlow<String?> = _gmailAccessToken
-    
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
     
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+    
     init {
-        // Verificar si hay una sesión activa al iniciar
-        val account = GoogleSignIn.getLastSignedInAccount(context)
-        account?.let {
-            _userEmail.value = it.email
-            _userName.value = it.displayName
-            _userId.value = it.id
-            AppLogger.i("Sesión existente encontrada: ${it.email}")
-            
-            // Verificar si tenemos acceso a Gmail
-            if (it.grantedScopes.contains(Scope(GmailScopes.GMAIL_READONLY))) {
-                AppLogger.i("Acceso a Gmail ya concedido")
-                _gmailAccessToken.value = "Acceso concedido"
+        checkExistingSession()
+    }
+    
+    private fun checkExistingSession() {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                if (googleAuthRepository.isUserSignedIn()) {
+                    val account = googleAuthRepository.getLastSignedInAccount()
+                    account?.let {
+                        updateUserInfo(it)
+                        AppLogger.i("Sesión existente recuperada: ${it.email}")
+                    }
+                }
+            } catch (e: Exception) {
+                AppLogger.e("Error al verificar sesión existente", e)
+                _error.value = "Error al verificar la sesión: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
         }
     }
     
     fun getSignInClient(): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestProfile()
-            .requestId()
-            .requestScopes(Scope(GmailScopes.GMAIL_READONLY))
-            .build()
-        
-        return GoogleSignIn.getClient(context, gso)
-    }
-    
-    fun isUserSignedIn(): Boolean {
-        val account = GoogleSignIn.getLastSignedInAccount(context)
-        return account != null
+        return googleAuthRepository.getSignInClient()
     }
     
     fun handleSignInResult(account: GoogleSignInAccount) {
         viewModelScope.launch {
             try {
-                AppLogger.i("Usuario autenticado: ${account.email}")
-                _userEmail.value = account.email
-                _userName.value = account.displayName
-                _userId.value = account.id
+                _isLoading.value = true
+                _error.value = null
                 
-                // Verificar acceso a Gmail
-                if (account.grantedScopes.contains(Scope(GmailScopes.GMAIL_READONLY))) {
-                    AppLogger.i("Acceso a Gmail concedido")
-                    _gmailAccessToken.value = "Acceso concedido"
-                } else {
-                    AppLogger.w("Acceso a Gmail no concedido")
-                    _gmailAccessToken.value = "Acceso no concedido"
-                }
+                googleAuthRepository.handleSignInResult(account)
+                updateUserInfo(account)
                 
-                // Obtener el token ID
-                account.idToken?.let { token ->
-                    AppLogger.d("Token ID obtenido: ${token.take(10)}...")
-                }
+                AppLogger.i("Usuario autenticado exitosamente: ${account.email}")
             } catch (e: Exception) {
-                AppLogger.e("Error al procesar el inicio de sesión", e)
-                _error.value = "Error al procesar el inicio de sesión: ${e.message}"
+                AppLogger.e("Error en el proceso de inicio de sesión", e)
+                _error.value = e.message
+                clearUserInfo()
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -103,20 +83,28 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             try {
-                // Primero revocar el acceso
-                getSignInClient().revokeAccess().addOnCompleteListener {
-                    // Luego cerrar sesión
-                    getSignInClient().signOut()
-                    _userEmail.value = null
-                    _userName.value = null
-                    _userId.value = null
-                    _gmailAccessToken.value = null
-                    AppLogger.i("Usuario cerrado sesión y acceso revocado")
-                }
+                _isLoading.value = true
+                googleAuthRepository.signOut()
+                clearUserInfo()
+                AppLogger.i("Usuario cerró sesión exitosamente")
             } catch (e: Exception) {
                 AppLogger.e("Error al cerrar sesión", e)
-                _error.value = "Error al cerrar sesión: ${e.message}"
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
             }
         }
+    }
+    
+    private fun updateUserInfo(account: GoogleSignInAccount) {
+        _userEmail.value = account.email
+        _userName.value = account.displayName
+        _userId.value = account.id
+    }
+    
+    private fun clearUserInfo() {
+        _userEmail.value = null
+        _userName.value = null
+        _userId.value = null
     }
 } 

@@ -10,6 +10,9 @@ local.properties
 captures/
 output.json
 
+# === Excepción para el APK de debug ===
+!presupuesto-debug.apk
+
 # === Archivos generados automáticamente ===
 *.hprof
 java_pid*.hprof

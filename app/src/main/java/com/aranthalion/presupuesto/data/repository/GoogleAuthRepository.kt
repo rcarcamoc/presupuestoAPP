@@ -7,7 +7,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
+import com.google.api.services.gmail.GmailScopes
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -26,52 +28,93 @@ class GoogleAuthRepository @Inject constructor(
             .requestId()
             .requestIdToken(context.getString(com.aranthalion.presupuesto.R.string.server_client_id))
             .requestServerAuthCode(context.getString(com.aranthalion.presupuesto.R.string.server_client_id))
-            .requestScopes(Scope(Scopes.EMAIL))
-            .requestScopes(Scope(Scopes.PROFILE))
+            .requestScopes(
+                Scope(Scopes.EMAIL),
+                Scope(Scopes.PROFILE),
+                Scope(GmailScopes.GMAIL_READONLY)
+            )
             .build()
         
         GoogleSignIn.getClient(context, gso).also {
-            Log.d(TAG, "GoogleSignInClient initialized with all scopes")
+            Log.d(TAG, "GoogleSignInClient inicializado con todos los scopes necesarios")
         }
     }
 
     fun getSignInClient(): GoogleSignInClient = googleSignInClient.also {
-        Log.d(TAG, "Getting GoogleSignInClient")
+        Log.d(TAG, "Obteniendo GoogleSignInClient")
     }
 
     fun getLastSignedInAccount(): GoogleSignInAccount? =
         GoogleSignIn.getLastSignedInAccount(context).also { account ->
-            Log.d(TAG, "Last signed in account: ${account?.email}")
+            Log.d(TAG, "Última cuenta con sesión iniciada: ${account?.email}")
         }
 
-    fun isUserSignedIn(): Boolean =
-        getLastSignedInAccount()?.let { account ->
-            Log.d(TAG, "Checking if user is signed in with email: ${account.email}")
-            account.idToken != null && account.serverAuthCode != null
+    fun isUserSignedIn(): Boolean {
+        val account = getLastSignedInAccount()
+        return account?.let { acc ->
+            Log.d(TAG, "Verificando sesión para: ${acc.email}")
+            val hasRequiredScopes = GoogleSignIn.hasPermissions(
+                acc,
+                Scope(Scopes.EMAIL),
+                Scope(Scopes.PROFILE),
+                Scope(GmailScopes.GMAIL_READONLY)
+            )
+            val hasTokens = acc.idToken != null && acc.serverAuthCode != null
+            
+            if (!hasRequiredScopes) {
+                Log.w(TAG, "Usuario no tiene todos los permisos necesarios")
+                false
+            } else if (!hasTokens) {
+                Log.w(TAG, "Usuario no tiene los tokens necesarios")
+                false
+            } else {
+                Log.d(TAG, "Usuario tiene sesión válida con todos los permisos")
+                true
+            }
         } ?: false
+    }
 
     suspend fun signOut() {
         try {
-            Log.d(TAG, "Signing out")
+            Log.d(TAG, "Cerrando sesión")
+            googleSignInClient.revokeAccess().await()
             googleSignInClient.signOut().await()
+            Log.d(TAG, "Sesión cerrada exitosamente")
         } catch (e: Exception) {
-            Log.e(TAG, "Error signing out", e)
+            Log.e(TAG, "Error al cerrar sesión", e)
             throw Exception("Error al cerrar sesión: ${e.message}")
         }
     }
 
     suspend fun handleSignInResult(account: GoogleSignInAccount) {
         try {
-            Log.d(TAG, "Handling sign in result for account: ${account.email}")
+            Log.d(TAG, "Procesando resultado de inicio de sesión para: ${account.email}")
+            
+            // Verificar tokens
             if (account.idToken == null || account.serverAuthCode == null) {
-                Log.e(TAG, "Missing token or auth code")
-        googleSignInClient.signOut().await()
-                throw Exception("No se obtuvieron los permisos necesarios. Por favor, inténtalo de nuevo.")
+                Log.e(TAG, "Faltan tokens necesarios")
+                throw Exception("No se obtuvieron los tokens necesarios. Por favor, intente nuevamente.")
             }
-            Log.d(TAG, "Sign in successful with token and auth code")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error handling sign in result", e)
+
+            // Verificar permisos
+            if (!GoogleSignIn.hasPermissions(
+                account,
+                Scope(Scopes.EMAIL),
+                Scope(Scopes.PROFILE),
+                Scope(GmailScopes.GMAIL_READONLY)
+            )) {
+                Log.e(TAG, "Faltan permisos necesarios")
+                googleSignInClient.signOut().await()
+                throw Exception("No se obtuvieron todos los permisos necesarios. Por favor, intente nuevamente.")
+            }
+
+            Log.d(TAG, "Inicio de sesión exitoso con todos los permisos y tokens")
+        } catch (e: ApiException) {
+            Log.e(TAG, "Error de API de Google al procesar inicio de sesión", e)
             throw Exception("Error al procesar la autenticación: ${e.message}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al procesar inicio de sesión", e)
+            throw e
         }
     }
 } 
