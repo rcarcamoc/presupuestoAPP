@@ -38,8 +38,9 @@ android {
             isMinifyEnabled = false
             firebaseAppDistribution {
                 artifactType = "APK"
-                testers = "rcarcamoc@gmail.com"
-                releaseNotes = "Versión de prueba con autenticación de Google implementada"
+                testers = "aranthalion@gmail.com, ricardo.eric.carcamo@gmail.com"
+                releaseNotes = "Versión de prueba con autenticación de Google implementada y App Distribution configurada."
+                serviceCredentialsFile = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json").path
             }
         }
     }

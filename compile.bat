@@ -12,5 +12,3 @@ if !errorlevel! equ 0 (
 ) else (
     echo ❌ La compilación falló con código de error: !errorlevel!
 )
-
-pause 
