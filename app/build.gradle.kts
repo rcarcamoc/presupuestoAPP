@@ -4,9 +4,6 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.appdistribution")
-    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -36,12 +33,6 @@ android {
         }
         debug {
             isMinifyEnabled = false
-            firebaseAppDistribution {
-                artifactType = "APK"
-                testers = "aranthalion@gmail.com, ricardo.eric.carcamo@gmail.com"
-                releaseNotes = "Versión de prueba con autenticación de Google implementada y App Distribution configurada."
-                serviceCredentialsFile = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json").path
-            }
         }
     }
     
@@ -99,9 +90,6 @@ dependencies {
     
     // Logging & Analytics
     implementation("com.jakewharton.timber:timber:5.0.1")
-    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
-    implementation("com.google.firebase:firebase-crashlytics-ktx")
-    implementation("com.google.firebase:firebase-analytics-ktx")
     
     // Compose
     implementation("androidx.compose.ui:ui")
@@ -126,9 +114,6 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
     // Firebase/Google Services
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.android.gms:play-services-base:18.3.0")
-    implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.api-client:google-api-client-android:2.2.0") {
         exclude(group = "org.apache.httpcomponents")
     }
@@ -146,7 +131,6 @@ dependencies {
     
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     
     // Charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
@@ -154,6 +138,10 @@ dependencies {
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.hilt:hilt-work:1.1.0")
+    
+    // JavaMail API for Android
+    implementation("com.sun.mail:android-mail:1.6.7")
+    implementation("com.sun.mail:android-activation:1.6.7")
     
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

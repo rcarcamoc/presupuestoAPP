@@ -2,7 +2,6 @@ package com.aranthalion.presupuesto.util
 
 import android.util.Log
 import com.aranthalion.presupuesto.BuildConfig
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import timber.log.Timber
 
 object AppLogger {
@@ -38,15 +37,15 @@ object AppLogger {
                 return
             }
             
-            FirebaseCrashlytics.getInstance().apply {
-                setCustomKey("priority", priority)
-                tag?.let { setCustomKey("tag", it) }
-                log(message)
-                
-                if (t != null && (priority == Log.ERROR || priority == Log.WARN)) {
-                    recordException(t)
-                }
-            }
+            // FirebaseCrashlytics.getInstance().apply {
+            //     setCustomKey("priority", priority)
+            //     tag?.let { setCustomKey("tag", it) }
+            //     log(message)
+            //     
+            //     if (t != null && (priority == Log.ERROR || priority == Log.WARN)) {
+            //         recordException(t)
+            //     }
+            // }
         }
     }
 } 

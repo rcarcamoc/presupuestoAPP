@@ -1,31 +1,32 @@
 package com.aranthalion.presupuesto.util
 
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.crashlytics.FirebaseCrashlytics
+// import com.google.firebase.analytics.FirebaseAnalytics // Eliminado
+// import com.google.firebase.analytics.ktx.logEvent // Eliminado
+// import com.google.firebase.crashlytics.FirebaseCrashlytics // Eliminado
 import timber.log.Timber
 
 object AnalyticsLogger {
-    private var firebaseAnalytics: FirebaseAnalytics? = null
+    // private var firebaseAnalytics: FirebaseAnalytics? = null // Eliminado
 
-    fun init(analytics: FirebaseAnalytics) {
-        firebaseAnalytics = analytics
+    fun init(/* analytics: FirebaseAnalytics */) { // Parámetro eliminado
+        // firebaseAnalytics = analytics // Eliminado
+        Timber.i("AnalyticsLogger: init() llamado. Funcionalidad de Firebase eliminada.")
     }
 
     fun logEvent(eventName: String, params: Map<String, Any> = emptyMap()) {
         Timber.i("EVENT: $eventName - $params")
         
-        firebaseAnalytics?.logEvent(eventName) {
-            params.forEach { (key, value) ->
-                when (value) {
-                    is String -> param(key, value)
-                    is Long -> param(key, value)
-                    is Double -> param(key, value)
-                    is Boolean -> param(key, value.toString())
-                    else -> param(key, value.toString())
-                }
-            }
-        }
+        // firebaseAnalytics?.logEvent(eventName) { // Bloque eliminado
+        //     params.forEach { (key, value) ->
+        //         when (value) {
+        //             is String -> param(key, value)
+        //             is Long -> param(key, value)
+        //             is Double -> param(key, value)
+        //             is Boolean -> param(key, value.toString())
+        //             else -> param(key, value.toString())
+        //         }
+        //     }
+        // }
     }
 
     fun logLogin(method: String, success: Boolean) {
@@ -45,13 +46,13 @@ object AnalyticsLogger {
             "error_message" to errorMessage
         ))
         
-        FirebaseCrashlytics.getInstance().apply {
-            setCustomKey("error_type", errorType)
-            log(errorMessage)
-            throwable?.let { recordException(it) }
-        }
+        // FirebaseCrashlytics.getInstance().apply { // Bloque eliminado
+        //     setCustomKey("error_type", errorType)
+        //     log(errorMessage)
+        //     throwable?.let { recordException(it) }
+        // }
         
-        throwable?.let { Timber.e(it) }
+        throwable?.let { Timber.e(it, "ERROR_REPORT: Type: $errorType, Message: $errorMessage") } ?: Timber.e("ERROR_REPORT: Type: $errorType, Message: $errorMessage")
     }
 
     fun logDeviceInfo() {
@@ -64,8 +65,8 @@ object AnalyticsLogger {
         
         logEvent("device_info", deviceInfo)
         
-        deviceInfo.forEach { (key, value) ->
-            FirebaseCrashlytics.getInstance().setCustomKey(key, value)
-        }
+        // deviceInfo.forEach { (key, value) -> // Bloque eliminado
+        //     FirebaseCrashlytics.getInstance().setCustomKey(key, value)
+        // }
     }
 } 

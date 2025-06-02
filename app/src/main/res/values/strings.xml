@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PresupuestoAPP</string>
-    <string name="server_client_id">859610950751-6i5him1fj9dr6191fh91djcafc828533.apps.googleusercontent.com</string>
-    <string name="google_sign_in_error">Error al iniciar sesión con Google</string>
-    <string name="google_sign_in_success">Inicio de sesión exitoso</string>
-    <string name="google_sign_out_success">Sesión cerrada exitosamente</string>
-    <string name="google_sign_in_cancelled">Inicio de sesión cancelado</string>
+    <!-- Los siguientes strings relacionados con Google Sign-In han sido eliminados -->
+    <!-- <string name="server_client_id">859610950751-6i5him1fj9dr6191fh91djcafc828533.apps.googleusercontent.com</string> -->
+    <!-- <string name="google_sign_in_error">Error al iniciar sesión con Google</string> -->
+    <!-- <string name="google_sign_in_success">Inicio de sesión exitoso</string> -->
+    <!-- <string name="google_sign_out_success">Sesión cerrada exitosamente</string> -->
+    <!-- <string name="google_sign_in_cancelled">Inicio de sesión cancelado</string> -->
+
+    <!-- Nuevos strings para el login POP3/IMAP -->
+    <string name="email_server_login_title">Configuración de Correo</string>
+    <string name="email_label">Correo Electrónico</string>
+    <string name="password_label">Contraseña</string>
+    <string name="server_type_label">Tipo de Servidor (IMAP/POP3)</string>
+    <string name="server_address_label">Dirección del Servidor</string>
+    <string name="server_port_label">Puerto</string>
+    <string name="encryption_type_label">Cifrado (SSL/TLS, STARTTLS)</string>
+    <string name="connect_button_label">Conectar y Contar Correos</string>
+    <string name="unread_emails_message">Tienes %d correos sin leer.</string>
+    <string name="no_unread_emails_message">No tienes correos sin leer.</string>
+    <string name="error_connecting_server">Error al conectar con el servidor: %s</string>
+
 </resources>
