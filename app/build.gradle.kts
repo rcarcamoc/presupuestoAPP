@@ -4,6 +4,8 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.appdistribution")
 }
 
 android {
@@ -33,6 +35,12 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            firebaseAppDistribution {
+                artifactType = "APK"
+                testers = "aranthalion@gmail.com, ricardo.eric.carcamo@gmail.com"
+                releaseNotes = "Versión con login por correo directo (POP3/IMAP) y sin login de Google."
+                serviceCredentialsFile = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json").path
+            }
         }
     }
     
@@ -66,11 +74,9 @@ android {
             excludes += "META-INF/notice.txt"
             excludes += "META-INF/ASL2.0"
             excludes += "META-INF/*.kotlin_module"
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/NOTICE.md"
             pickFirsts += "META-INF/jersey-module-version"
-            pickFirsts += "META-INF/NOTICE.txt"
-            pickFirsts += "META-INF/LICENSE.txt"
-            pickFirsts += "META-INF/DEPENDENCIES"
-            pickFirsts += "META-INF/ASL2.0"
             pickFirsts += "META-INF/INDEX.LIST"
         }
     }

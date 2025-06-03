@@ -40,8 +40,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val authViewModel: AuthViewModel = hiltViewModel()
-    val userEmail by authViewModel.userEmail.collectAsState()
+    // val authViewModel: AuthViewModel = hiltViewModel() // Todavía necesario si HomeScreen lo usa indirectamente o para otras cosas
+    // val userEmail by authViewModel.userEmail.collectAsState() // Eliminado para resolver la advertencia
     
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
