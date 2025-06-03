@@ -6,6 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.gms.google-services")
     id("com.google.firebase.appdistribution")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -96,6 +97,8 @@ dependencies {
     
     // Logging & Analytics
     implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
+    implementation("com.google.firebase:firebase-crashlytics-ktx")
     
     // Compose
     implementation("androidx.compose.ui:ui")
@@ -148,6 +151,9 @@ dependencies {
     // JavaMail API for Android
     implementation("com.sun.mail:android-mail:1.6.7")
     implementation("com.sun.mail:android-activation:1.6.7")
+    
+    // Encrypted SharedPreferences
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     
     // Debug
     debugImplementation("androidx.compose.ui:ui-tooling")

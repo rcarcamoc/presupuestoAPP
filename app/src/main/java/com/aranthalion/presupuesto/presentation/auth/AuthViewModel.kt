@@ -3,6 +3,7 @@ package com.aranthalion.presupuesto.presentation.auth
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aranthalion.presupuesto.data.repository.UserPreferencesRepository
 import com.aranthalion.presupuesto.util.AppLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +22,8 @@ import javax.mail.Store
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
     
     private val _userEmail = MutableStateFlow<String?>(null)
@@ -35,9 +37,13 @@ class AuthViewModel @Inject constructor(
     
     private val _unreadEmailCount = MutableStateFlow<Int?>(null)
     val unreadEmailCount: StateFlow<Int?> = _unreadEmailCount
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
     
     init {
         AppLogger.d("AuthViewModel: init block.")
+        // Cargar detalles de conexión guardados al iniciar (se hará en LoginScreen para pre-rellenar)
     }
     
     fun isUserSignedIn(): Boolean {
@@ -52,6 +58,9 @@ class AuthViewModel @Inject constructor(
             _userName.value = null
             _error.value = null
             _unreadEmailCount.value = null
+            _isLoading.value = false // Asegurar que isLoading se resetee
+            // Considerar si se deben limpiar las preferencias guardadas aquí o dar una opción al usuario
+            // userPreferencesRepository.clearEmailConnectionDetails() 
             AppLogger.i("AuthViewModel: Usuario cerró sesión.")
         }
     }
@@ -59,8 +68,9 @@ class AuthViewModel @Inject constructor(
     fun loginWithEmailProvider(email: String, password: String, serverType: String, serverAddress: String, port: Int, encryption: String) {
         AppLogger.i("AuthViewModel: loginWithEmailProvider llamado para $email, Servidor: $serverType $serverAddress:$port, Cifrado: $encryption")
         viewModelScope.launch {
-            _error.value = null
-            _unreadEmailCount.value = null
+            _isLoading.value = true
+            _error.value = null // Limpiar error anterior
+            _unreadEmailCount.value = null // Limpiar contador anterior
             try {
                 val count = connectAndCountUnreadEmails(email, password, serverType, serverAddress, port, encryption)
                 _userEmail.value = email
@@ -77,6 +87,8 @@ class AuthViewModel @Inject constructor(
             catch (e: Exception) {
                 AppLogger.e("AuthViewModel: Error desconocido en loginWithEmailProvider", e)
                 _error.value = "Error inesperado: ${e.message}"
+            } finally {
+                _isLoading.value = false // Asegurar que isLoading se apague
             }
         }
     }
@@ -90,6 +102,9 @@ class AuthViewModel @Inject constructor(
             props["mail.$protocol.host"] = host
             props["mail.$protocol.port"] = port.toString()
             props["mail.$protocol.auth"] = "true"
+            // Timeouts (en milisegundos)
+            props["mail.$protocol.connectiontimeout"] = "60000" // 1 minuto
+            props["mail.$protocol.timeout"] = "60000" // 1 minuto
 
             // Configuración de cifrado
             when (encryption) {
@@ -99,17 +114,17 @@ class AuthViewModel @Inject constructor(
                         props["mail.pop3.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
                         props["mail.pop3.socketFactory.fallback"] = "false"
                         props["mail.pop3.socketFactory.port"] = port.toString()
+                    } else if (protocol == "imap") { // IMAPS
+                         props["mail.imap.ssl.trust"] = "*" // Confiar en todos los certificados SSL (considerar la seguridad para producción)
                     }
                 }
                 "STARTTLS" -> {
                     props["mail.$protocol.starttls.enable"] = "true"
-                     // Para IMAP, starttls es común. Para POP3, puede requerir config adicional o no ser estándar.
-                    if (protocol == "imap") {
+                     if (protocol == "imap") {
                          props["mail.imap.starttls.required"] = "true" // Opcional, pero más seguro
                     }
                 }
                 "None" -> {
-                    // No se añade configuración extra de seguridad
                     AppLogger.w("Conexión sin cifrado seleccionada para $protocol")
                 }
                 else -> {
@@ -118,17 +133,12 @@ class AuthViewModel @Inject constructor(
                 }
             }
             
-            // Ajustes específicos para IMAP y POP3
+            // Ajustes específicos de protocolo (store.protocol)
              if (protocol == "imap") {
-                props["mail.store.protocol"] = "imaps" // Usar imaps si SSL/TLS está activo
-                 if(encryption == "SSL/TLS") props["mail.imap.ssl.trust"] = "*" // Confiar en todos los certificados SSL (considerar la seguridad)
-                 else props["mail.store.protocol"] = "imap"
-
+                props["mail.store.protocol"] = if(encryption == "SSL/TLS") "imaps" else "imap"
             } else if (protocol == "pop3") {
-                 if(encryption == "SSL/TLS") props["mail.store.protocol"] = "pop3s"
-                 else props["mail.store.protocol"] = "pop3"
+                 props["mail.store.protocol"] = if(encryption == "SSL/TLS") "pop3s" else "pop3"
             }
-
 
             AppLogger.d("Propiedades de JavaMail: $props")
 
@@ -138,10 +148,10 @@ class AuthViewModel @Inject constructor(
             var store: Store? = null
             var inbox: Folder? = null
             try {
-                store = session.getStore(protocol)
-                AppLogger.d("Intentando conectar a $host:$port como $email")
-                store.connect(host, port, email, pass)
-                AppLogger.i("Conectado exitosamente al servidor $protocol")
+                store = session.getStore(props["mail.store.protocol"] as String? ?: protocol)
+                AppLogger.d("Intentando conectar a $host:$port como $email con protocolo ${store.urlName}")
+                store.connect(email, pass) // El host y puerto ya están en las propiedades para connect
+                AppLogger.i("Conectado exitosamente al servidor ${props["mail.store.protocol"]}")
 
                 inbox = store.getFolder("INBOX")
                 inbox.open(Folder.READ_ONLY)
@@ -150,11 +160,11 @@ class AuthViewModel @Inject constructor(
                 AppLogger.i("Número de mensajes no leídos: $unreadCount")
                 return@withContext unreadCount
             } catch (e: NoSuchProviderException) {
-                AppLogger.e("Proveedor no encontrado para $protocol", e)
-                throw MessagingException("Proveedor de servicio no encontrado: $protocol", e)
+                AppLogger.e("Proveedor no encontrado para $protocol o ${props["mail.store.protocol"]}", e)
+                throw MessagingException("Proveedor de servicio no encontrado: ${props["mail.store.protocol"]}", e)
             } catch (e: MessagingException) {
                 AppLogger.e("Error de mensajería al conectar o leer el buzón", e)
-                throw e // Re-lanzar para ser atrapado por el bloqueador externo
+                throw e 
             } catch (e: Exception) {
                 AppLogger.e("Error inesperado en connectAndCountUnreadEmails", e)
                 throw RuntimeException("Error inesperado durante la conexión al correo.", e)
@@ -168,5 +178,18 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    // Funciones para UserPreferencesRepository
+    suspend fun saveLastConnectionDetails(details: com.aranthalion.presupuesto.data.repository.EmailConnectionDetails) {
+        userPreferencesRepository.saveEmailConnectionDetails(details)
+    }
+
+    suspend fun loadLastConnectionDetails(): com.aranthalion.presupuesto.data.repository.EmailConnectionDetails? {
+        return userPreferencesRepository.getEmailConnectionDetails()
+    }
+
+    suspend fun clearLastConnectionDetails() {
+        userPreferencesRepository.clearEmailConnectionDetails()
     }
 } 

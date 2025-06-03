@@ -15,36 +15,83 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import com.aranthalion.presupuesto.data.repository.EmailConnectionDetails
+import kotlinx.coroutines.launch
 
+private fun getDefaultPortFor(serverType: String, encryptionType: String): String {
+    return when (serverType) {
+        "IMAP" -> when (encryptionType) {
+            "SSL/TLS" -> "993"
+            "STARTTLS" -> "143"
+            "None" -> "143"
+            else -> "993"
+        }
+        "POP3" -> when (encryptionType) {
+            "SSL/TLS" -> "995"
+            "STARTTLS" -> "110"
+            "None" -> "110"
+            else -> "995"
+        }
+        else -> "993"
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
-    var isLoading by remember { mutableStateOf(false) }
-    var showError by remember { mutableStateOf(false) }
+    // Usar el isLoading del ViewModel
+    val isLoading by viewModel.isLoading.collectAsState()
     val errorViewModel by viewModel.error.collectAsState()
-
     val userEmail by viewModel.userEmail.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    var emailInput by remember { mutableStateOf("usuario@cock.li") }
+    // Estados para los campos del formulario
+    var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var serverType by remember { mutableStateOf("IMAP") }
+    var serverTypeState by remember { mutableStateOf("IMAP") }
+    var encryptionTypeState by remember { mutableStateOf("SSL/TLS") }
     var serverAddress by remember { mutableStateOf("mail.cock.li") }
-    var serverPort by remember { mutableStateof("993") }
-    var encryptionType by remember { mutableStateOf("SSL/TLS") }
+    var serverPort by remember { mutableStateOf(getDefaultPortFor(serverTypeState, encryptionTypeState)) }
+    
+    // Cargar preferencias al iniciar la pantalla
+    LaunchedEffect(Unit) {
+        AppLogger.d("LoginScreen: LaunchedEffect(Unit) - Cargando preferencias.")
+        coroutineScope.launch {
+            viewModel.loadLastConnectionDetails()?.let {
+                AppLogger.i("LoginScreen: Preferencias cargadas: $it")
+                emailInput = it.email
+                serverAddress = it.serverAddress
+                serverPort = it.serverPort
+                serverTypeState = it.serverType
+                encryptionTypeState = it.encryptionType
+                // La contraseña no se guarda/carga por seguridad
+            } ?: run {
+                AppLogger.d("LoginScreen: No hay preferencias guardadas, usando valores por defecto cock.li")
+                // Si no hay nada guardado, asegurar valores por defecto de cock.li
+                emailInput = "usuario@cock.li"
+                serverAddress = "mail.cock.li"
+                serverTypeState = "IMAP"
+                encryptionTypeState = "SSL/TLS"
+                serverPort = getDefaultPortFor(serverTypeState, encryptionTypeState)
+            }
+        }
+    }
 
-    val serverTypes = listOf("IMAP", "POP3")
-    val encryptionTypes = listOf("SSL/TLS", "STARTTLS", "None")
+    // Actualizar puerto cuando serverType o encryptionType cambien
+    LaunchedEffect(serverTypeState, encryptionTypeState) {
+        serverPort = getDefaultPortFor(serverTypeState, encryptionTypeState)
+        AppLogger.d("LoginScreen: serverType o encryptionType cambiado. Nuevo puerto: $serverPort para $serverTypeState y $encryptionTypeState")
+    }
 
+    // Navegar al éxito del login
     LaunchedEffect(userEmail) {
-        AppLogger.d("LoginScreen: userEmail state changed to: $userEmail")
         if (userEmail != null) {
             AppLogger.i("LoginScreen: Usuario autenticado ($userEmail), navegando a onLoginSuccess.")
             onLoginSuccess()
-        } else {
-            AppLogger.d("LoginScreen: Usuario no está autenticado.")
         }
     }
 
@@ -66,7 +113,8 @@ fun LoginScreen(
                 onValueChange = { emailInput = it },
                 label = { Text("Correo Electrónico") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             OutlinedTextField(
@@ -85,7 +133,8 @@ fun LoginScreen(
                         Icon(imageVector  = image, description)
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -93,17 +142,9 @@ fun LoginScreen(
                 serverTypes.forEach { type ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
-                            selected = (type == serverType),
-                            onClick = { 
-                                serverType = type
-                                if (type == "IMAP") {
-                                    serverPort = "993"
-                                    serverAddress = "mail.cock.li"
-                                } else {
-                                    serverPort = "995"
-                                    serverAddress = "mail.cock.li"
-                                }
-                            }
+                            selected = (type == serverTypeState),
+                            onClick = { serverTypeState = type },
+                            enabled = !isLoading
                         )
                         Text(text = type)
                     }
@@ -115,40 +156,48 @@ fun LoginScreen(
                 onValueChange = { serverAddress = it },
                 label = { Text("Dirección del Servidor") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             OutlinedTextField(
                 value = serverPort,
-                onValueChange = { serverPort = it },
+                onValueChange = { serverPort = it }, 
                 label = { Text("Puerto del Servidor") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
             
             var expandedEncryption by remember { mutableStateOf(false) }
-            Box(modifier = Modifier.fillMaxWidth()) {
+            ExposedDropdownMenuBox(
+                expanded = expandedEncryption,
+                onExpandedChange = { if (!isLoading) expandedEncryption = !expandedEncryption },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 OutlinedTextField(
-                    value = encryptionType,
-                    onValueChange = { },
+                    value = encryptionTypeState,
+                    onValueChange = {},
                     label = { Text("Tipo de Cifrado") },
                     readOnly = true,
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEncryption) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    enabled = !isLoading
                 )
-                DropdownMenu(
+                ExposedDropdownMenu(
                     expanded = expandedEncryption,
-                    onDismissRequest = { expandedEncryption = false },
-                    modifier = Modifier.fillMaxWidth()
+                    onDismissRequest = { expandedEncryption = false }
                 ) {
                     encryptionTypes.forEach { selectionOption ->
                         DropdownMenuItem(
                             text = { Text(selectionOption) },
                             onClick = {
-                                encryptionType = selectionOption
+                                encryptionTypeState = selectionOption
                                 expandedEncryption = false
-                            }
+                            },
+                            enabled = !isLoading
                         )
                     }
                 }
@@ -162,35 +211,39 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         AppLogger.i("LoginScreen: Botón 'Conectar y Contar Correos' presionado.")
-                        isLoading = true
-                        showError = false
-                        viewModel.loginWithEmailProvider(
+                        val detailsToSave = EmailConnectionDetails(
                             email = emailInput,
-                            password = passwordInput,
-                            serverType = serverType,
                             serverAddress = serverAddress,
-                            port = serverPort.toIntOrNull() ?: if (serverType == "IMAP") 993 else 995,
-                            encryption = encryptionType
+                            serverPort = serverPort,
+                            serverType = serverTypeState,
+                            encryptionType = encryptionTypeState
                         )
+                        coroutineScope.launch {
+                            viewModel.saveLastConnectionDetails(detailsToSave)
+                            AppLogger.d("LoginScreen: Detalles guardados: $detailsToSave")
+                            viewModel.loginWithEmailProvider(
+                                email = emailInput,
+                                password = passwordInput, // La contraseña no se guarda, se toma del campo actual
+                                serverType = serverTypeState,
+                                serverAddress = serverAddress,
+                                port = serverPort.toIntOrNull() ?: getDefaultPortFor(serverTypeState, encryptionTypeState).toInt(),
+                                encryption = encryptionTypeState
+                            )
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = emailInput.isNotBlank() && passwordInput.isNotBlank() && serverAddress.isNotBlank() && serverPort.isNotBlank()
+                    enabled = emailInput.isNotBlank() && passwordInput.isNotBlank() && serverAddress.isNotBlank() && serverPort.isNotBlank() && !isLoading
                 ) {
                     Text("Conectar y Contar Correos")
                 }
             }
 
-            errorViewModel?.let { errorMsg ->
+            errorViewModel?.let {
                  Text(
                     text = "Error: $errorMsg",
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-            }
-            
-            if (showError) {
-                // Esta sección podría usarse para errores de validación de UI antes de llamar al ViewModel
-                // Por ahora, el error del ViewModel es el principal.
             }
         }
     }
