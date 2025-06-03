@@ -18,7 +18,28 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.aranthalion.presupuesto.data.repository.EmailConnectionDetails
 import kotlinx.coroutines.launch
 
+// --- Definiciones de Preajustes ---
+data class ServerPreset(
+    val displayName: String,
+    val serverAddress: String,
+    val serverPort: String,
+    val serverType: String, // IMAP o POP3
+    val encryptionType: String // SSL/TLS, STARTTLS, None
+)
+
+val serverPresets = listOf(
+    ServerPreset("Gmail (IMAP)", "imap.gmail.com", "993", "IMAP", "SSL/TLS"),
+    ServerPreset("Gmail (POP3)", "pop.gmail.com", "995", "POP3", "SSL/TLS"),
+    ServerPreset("Cock.li (IMAP - SSL/TLS)", "mail.cock.li", "993", "IMAP", "SSL/TLS"),
+    ServerPreset("Cock.li (POP3 - SSL/TLS)", "mail.cock.li", "995", "POP3", "SSL/TLS"),
+    ServerPreset("Cock.li (IMAP - STARTTLS)", "mail.cock.li", "143", "IMAP", "STARTTLS"),
+    ServerPreset("Cock.li (POP3 - STARTTLS)", "mail.cock.li", "110", "POP3", "STARTTLS"),
+    // Podríamos añadir una opción para "Manual" o "Personalizado" si quisiéramos limpiar los campos o tener un estado explícito
+)
+// --- Fin Definiciones de Preajustes ---
+
 private fun getDefaultPortFor(serverType: String, encryptionType: String): String {
+    // Esta función sigue siendo útil si el usuario cambia manualmente el tipo/cifrado después de un preajuste o sin usar uno.
     return when (serverType) {
         "IMAP" -> when (encryptionType) {
             "SSL/TLS" -> "993"
@@ -57,6 +78,10 @@ fun LoginScreen(
     var serverAddress by remember { mutableStateOf("mail.cock.li") }
     var serverPort by remember { mutableStateOf(getDefaultPortFor(serverTypeState, encryptionTypeState)) }
     
+    // Estado para el desplegable de preajustes
+    var presetDropdownExpanded by remember { mutableStateOf(false) }
+    var selectedPresetDisplayName by remember { mutableStateOf("Configuración Rápida...") } // Placeholder
+
     // Cargar preferencias al iniciar la pantalla
     LaunchedEffect(Unit) {
         AppLogger.d("LoginScreen: LaunchedEffect(Unit) - Cargando preferencias.")
@@ -68,23 +93,36 @@ fun LoginScreen(
                 serverPort = it.serverPort
                 serverTypeState = it.serverType
                 encryptionTypeState = it.encryptionType
-                // La contraseña no se guarda/carga por seguridad
+                // Actualizar el display name del preset si coincide con alguno (opcional, más complejo)
+                 val matchedPreset = serverPresets.firstOrNull { p ->
+                    p.serverAddress == it.serverAddress && p.serverPort == it.serverPort && 
+                    p.serverType == it.serverType && p.encryptionType == it.encryptionType
+                }
+                selectedPresetDisplayName = matchedPreset?.displayName ?: "Configuración Personalizada"
+
             } ?: run {
-                AppLogger.d("LoginScreen: No hay preferencias guardadas, usando valores por defecto cock.li")
-                // Si no hay nada guardado, asegurar valores por defecto de cock.li
-                emailInput = "usuario@cock.li"
-                serverAddress = "mail.cock.li"
-                serverTypeState = "IMAP"
-                encryptionTypeState = "SSL/TLS"
-                serverPort = getDefaultPortFor(serverTypeState, encryptionTypeState)
+                AppLogger.d("LoginScreen: No hay preferencias guardadas, usando valores por defecto cock.li IMAP SSL/TLS")
+                val defaultPreset = serverPresets.first { it.displayName == "Cock.li (IMAP - SSL/TLS)" }
+                emailInput = "usuario@cock.li" // O dejar vacío: ""
+                serverAddress = defaultPreset.serverAddress
+                serverPort = defaultPreset.serverPort
+                serverTypeState = defaultPreset.serverType
+                encryptionTypeState = defaultPreset.encryptionType
+                selectedPresetDisplayName = defaultPreset.displayName
             }
         }
     }
 
     // Actualizar puerto cuando serverType o encryptionType cambien
     LaunchedEffect(serverTypeState, encryptionTypeState) {
-        serverPort = getDefaultPortFor(serverTypeState, encryptionTypeState)
-        AppLogger.d("LoginScreen: serverType o encryptionType cambiado. Nuevo puerto: $serverPort para $serverTypeState y $encryptionTypeState")
+        // Solo actualiza el puerto si no se acaba de seleccionar un preajuste que ya traía el puerto.
+        // Esto es para que el cambio manual de tipo/cifrado actualice el puerto.
+        if (serverPresets.none { it.displayName == selectedPresetDisplayName && 
+            it.serverType == serverTypeState && it.encryptionType == encryptionTypeState && 
+            it.serverPort == serverPort }) {
+            serverPort = getDefaultPortFor(serverTypeState, encryptionTypeState)
+        }
+        AppLogger.d("LoginScreen: serverType o encryptionType cambiado. Puerto: $serverPort para $serverTypeState y $encryptionTypeState")
     }
 
     // Navegar al éxito del login
@@ -103,14 +141,61 @@ fun LoginScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp), // Reducido espacio para más campos
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Configuración de Correo", style = MaterialTheme.typography.headlineSmall)
 
+            // Desplegable de Preajustes
+            ExposedDropdownMenuBox(
+                expanded = presetDropdownExpanded,
+                onExpandedChange = { if (!isLoading) presetDropdownExpanded = !presetDropdownExpanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = selectedPresetDisplayName,
+                    onValueChange = {}, // No editable directamente
+                    label = { Text("Configuración Rápida") },
+                    readOnly = true,
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = presetDropdownExpanded) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    enabled = !isLoading
+                )
+                ExposedDropdownMenu(
+                    expanded = presetDropdownExpanded,
+                    onDismissRequest = { presetDropdownExpanded = false }
+                ) {
+                    serverPresets.forEach { preset ->
+                        DropdownMenuItem(
+                            text = { Text(preset.displayName) },
+                            onClick = {
+                                serverAddress = preset.serverAddress
+                                serverPort = preset.serverPort
+                                serverTypeState = preset.serverType
+                                encryptionTypeState = preset.encryptionType
+                                selectedPresetDisplayName = preset.displayName
+                                presetDropdownExpanded = false
+                                // Opcional: Sugerir dominio de email si es un proveedor conocido y el email está vacío
+                                if (emailInput.isEmpty() || !emailInput.contains("@")) {
+                                    if (preset.displayName.startsWith("Gmail")) emailInput = "@gmail.com"
+                                    else if (preset.displayName.startsWith("Cock.li")) emailInput = "@cock.li"
+                                }
+                            },
+                            enabled = !isLoading
+                        )
+                    }
+                }
+            }
+
             OutlinedTextField(
                 value = emailInput,
-                onValueChange = { emailInput = it },
+                onValueChange = { emailInput = it 
+                                // Si el usuario edita el email, podría ya no ser un preajuste exacto
+                                if(selectedPresetDisplayName != "Configuración Personalizada") {
+                                     selectedPresetDisplayName = "Configuración Personalizada"
+                                }
+                },
                 label = { Text("Correo Electrónico") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -136,14 +221,17 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading
             )
+            
+            Text("Configuración Manual (Avanzado)", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text("Tipo:", modifier = Modifier.weight(1f))
+                Text("Tipo Servidor:", modifier = Modifier.weight(1f))
+                val serverTypes = listOf("IMAP", "POP3") // Definir localmente o pasar como param
                 serverTypes.forEach { type ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = (type == serverTypeState),
-                            onClick = { serverTypeState = type },
+                            onClick = { serverTypeState = type; selectedPresetDisplayName = "Configuración Personalizada" },
                             enabled = !isLoading
                         )
                         Text(text = type)
@@ -153,7 +241,7 @@ fun LoginScreen(
 
             OutlinedTextField(
                 value = serverAddress,
-                onValueChange = { serverAddress = it },
+                onValueChange = { serverAddress = it; selectedPresetDisplayName = "Configuración Personalizada" },
                 label = { Text("Dirección del Servidor") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -162,7 +250,7 @@ fun LoginScreen(
 
             OutlinedTextField(
                 value = serverPort,
-                onValueChange = { serverPort = it }, 
+                onValueChange = { serverPort = it; selectedPresetDisplayName = "Configuración Personalizada" }, 
                 label = { Text("Puerto del Servidor") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -171,6 +259,7 @@ fun LoginScreen(
             )
             
             var expandedEncryption by remember { mutableStateOf(false) }
+            val encryptionTypes = listOf("SSL/TLS", "STARTTLS", "None") // Definir localmente o pasar como param
             ExposedDropdownMenuBox(
                 expanded = expandedEncryption,
                 onExpandedChange = { if (!isLoading) expandedEncryption = !expandedEncryption },
@@ -195,6 +284,7 @@ fun LoginScreen(
                             text = { Text(selectionOption) },
                             onClick = {
                                 encryptionTypeState = selectionOption
+                                selectedPresetDisplayName = "Configuración Personalizada"
                                 expandedEncryption = false
                             },
                             enabled = !isLoading
@@ -203,7 +293,7 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             if (isLoading) {
                 CircularProgressIndicator()
@@ -223,7 +313,7 @@ fun LoginScreen(
                             AppLogger.d("LoginScreen: Detalles guardados: $detailsToSave")
                             viewModel.loginWithEmailProvider(
                                 email = emailInput,
-                                password = passwordInput, // La contraseña no se guarda, se toma del campo actual
+                                password = passwordInput, 
                                 serverType = serverTypeState,
                                 serverAddress = serverAddress,
                                 port = serverPort.toIntOrNull() ?: getDefaultPortFor(serverTypeState, encryptionTypeState).toInt(),
@@ -239,8 +329,8 @@ fun LoginScreen(
             }
 
             errorViewModel?.let {
-                 Text(
-                    text = "Error: $errorMsg",
+                Text(
+                    text = "Error: $errorViewModel",
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 8.dp)
                 )

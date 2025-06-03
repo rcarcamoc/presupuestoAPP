@@ -54,9 +54,9 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         AppLogger.i("AuthViewModel: signOut() llamado.")
         viewModelScope.launch {
-            _userEmail.value = null
-            _userName.value = null
-            _error.value = null
+                        _userEmail.value = null
+                        _userName.value = null
+                        _error.value = null
             _unreadEmailCount.value = null
             _isLoading.value = false // Asegurar que isLoading se resetee
             // Considerar si se deben limpiar las preferencias guardadas aquí o dar una opción al usuario

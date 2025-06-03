@@ -1,0 +1,502 @@
+Delivered-To: ricardo.eric.carcamo@gmail.com
+Received: by 2002:a9a:7110:0:b0:2c1:727c:4f74 with SMTP id x16csp3001042lkh;
+        Mon, 2 Jun 2025 11:55:59 -0700 (PDT)
+X-Forwarded-Encrypted: i=4; AJvYcCWldOV1KML7gQYnsrRALg51z0um9CjLp94TbN053RAFyfk3e1r9axzzewTNM322Q/oVQW2LRv1OYCDnPiqt4eWr3b5cNg==@gmail.com
+X-Received: by 2002:a17:902:d48b:b0:234:bc9f:82f2 with SMTP id d9443c01a7336-2355f78318emr140419245ad.46.1748890558974;
+        Mon, 02 Jun 2025 11:55:58 -0700 (PDT)
+ARC-Seal: i=3; a=rsa-sha256; t=1748890558; cv=pass;
+        d=google.com; s=arc-20240605;
+        b=lGwRsxf+j5LoIAdGe7QzmlEB/gbDXVDe+Ns1/yGIrCsfuittZJt8UgORZuHAb3zMWh
+         Ov2PGZVhZKzLUc0gQD7jzk8NJusjBwbduhqk75IXy/HNx2nCgkZ9pGbIvtCw4/gmf0dO
+         ZNVylAwBO4fIvEoH19R+a3N2tuO/1iV5QspPVH837vp6zzbl1ZK2SKQ+0LwiUualIOfE
+         mDRyOZqAcF4LJgqZkCh+oR73dYnEeoVAnYInSFBpbStpde7Kq9eaKmmbOLvJ2IxboxJY
+         4dk8NU8dWjNhKSPvmnAw0q4FAUIyRrkp0a12gZuDqUBcDkz9z8s4ArTCYhlvaeHBRncP
+         A/dA==
+ARC-Message-Signature: i=3; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:mime-version:subject:message-id:to:from
+         :date:dkim-signature:delivered-to;
+        bh=05dbZTWItA4ecFSxCA/p9SLjKzfKQkyf6VxmxDQx9aQ=;
+        fh=zpPcbSE6WjCIeR7rDPdBBAssjsObe/uHhWDlflhCfjo=;
+        b=P/OI5laydPWv+RIAdR5NOt5ktK4fjk5IbyHf4JCik5+H60MUNr0gpqPrWJ4dLdLb3S
+         k/wqUJzRL7gxQDt/M3ifRbHAH2E2kjH2ARngPJXkffduP+KpzJiR4LORWoPeC37EMKYX
+         P5PU10SzsOvq0j83CefK0qZfgeGhWck2ojQiShUhsK/qBARnBfXIXkp6/+3Cf/r+o7Lk
+         R8B497ZVeTuIpaBbSf7xBfEhyOXa4QvG88uR4txWCFTRnwp/XCQEHV8ifGl9qWrUoUsg
+         +aaqrPRzNdXP3Nhy76xKneB7ndKMovBD3IAkpEuK6GGVWbGWns/iG+U8Ov0Q1Gzygrdb
+         UDwA==;
+        dara=google.com
+ARC-Authentication-Results: i=3; mx.google.com;
+       dkim=pass header.i=@bci.cl header.s=mail1 header.b="VPfX/CzN";
+       arc=pass (i=2 spf=pass spfdomain=bci.cl dkim=pass dkdomain=bci.cl dmarc=pass fromdomain=bci.cl);
+       spf=pass (google.com: domain of ricardo.carcamo.cofre+caf_=ricardo.eric.carcamo=gmail.com@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom="ricardo.carcamo.cofre+caf_=ricardo.eric.carcamo=gmail.com@gmail.com";
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=bci.cl;
+       dara=pass header.i=@gmail.com
+Return-Path: <ricardo.carcamo.cofre+caf_=ricardo.eric.carcamo=gmail.com@gmail.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id d9443c01a7336-23506a923dfsor59511425ad.6.2025.06.02.11.55.58
+        for <ricardo.eric.carcamo@gmail.com>
+        (Google Transport Security);
+        Mon, 02 Jun 2025 11:55:58 -0700 (PDT)
+Received-SPF: pass (google.com: domain of ricardo.carcamo.cofre+caf_=ricardo.eric.carcamo=gmail.com@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@bci.cl header.s=mail1 header.b="VPfX/CzN";
+       arc=pass (i=2 spf=pass spfdomain=bci.cl dkim=pass dkdomain=bci.cl dmarc=pass fromdomain=bci.cl);
+       spf=pass (google.com: domain of ricardo.carcamo.cofre+caf_=ricardo.eric.carcamo=gmail.com@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom="ricardo.carcamo.cofre+caf_=ricardo.eric.carcamo=gmail.com@gmail.com";
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=bci.cl;
+       dara=pass header.i=@gmail.com
+ARC-Seal: i=2; a=rsa-sha256; t=1748890558; cv=pass;
+        d=google.com; s=arc-20240605;
+        b=bxnNVOjDhXkjQ/W8Ap8TjeNQUdi/4o4tGi7Rdg7fqO1WqFeEW7nG9EkrZ7z8VZswU9
+         qGF7z4DTwFqm6CiD87OX15iB4uwSQpk1knYZBuHBdrSFEBGkR6brsugZ2R8LwEwaOtlM
+         EiUfWEBbMY6dwyROTGeTkBOWka7N2pWNwpAqO/Gv5wqo3SgfdF6zulRfck8xOVcpYJT8
+         biRVCo8ish81J3TNSTNQteoq/DqrrLvuUwkTl138h2FeVpdxTo4cyFpXDu64Cos7fPmd
+         wF4OnYhYtgDU5gM/e9uPiY34kPeCl1yfNZhzST9A5hM4CyVj3Bs087vC7+EN+EKBENRQ
+         McLg==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:mime-version:subject:message-id:to:from
+         :date:dkim-signature:delivered-to;
+        bh=05dbZTWItA4ecFSxCA/p9SLjKzfKQkyf6VxmxDQx9aQ=;
+        fh=zpPcbSE6WjCIeR7rDPdBBAssjsObe/uHhWDlflhCfjo=;
+        b=CSURaIYmBlCJ7/Z4mQx9j0G7ndZAQsQadgtGxzuCmKRrd6Cr232sGSag7gLVr9/RRY
+         aTWkF5e/cMJd/FHdsZGJFnzX7ylfDSDruhIVRiIdPyz5nkzrxSM/DASNpVMVkRtYd3zW
+         pOQVjDhSMRWjD6cpUpeuNyiNRoz6VLbhGMvP9dRTco0RquT/rgUgugu11ACe1oxibljQ
+         yb2dcL6IwlPRmf8+0a/MipgQi34TmxrV1IAMUBEu/XewCDF4kDeqiu5zhnh2YMz9slK/
+         5xAv8OshmSt4ZqUt4A95xVo/bueNmHTVU3m0zd03ZtN7b8EEq+LZWiDdfI8c2Ke6Fiyp
+         uibA==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@bci.cl header.s=mail1 header.b="VPfX/CzN";
+       spf=pass (google.com: domain of contacto@bci.cl designates 200.68.28.187 as permitted sender) smtp.mailfrom=contacto@bci.cl;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=bci.cl
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748890558; x=1749495358;
+        h=content-transfer-encoding:mime-version:subject:message-id:to:from
+         :date:dkim-signature:delivered-to:x-forwarded-for:x-forwarded-to
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=05dbZTWItA4ecFSxCA/p9SLjKzfKQkyf6VxmxDQx9aQ=;
+        b=H3Uc9nGdQtFrrO1pY8wikOmD4mgRzbfclpJyhXpb4fKEgZ9VoUY86MfDwj22fR6lTV
+         C+is6AxdV5LBqXb8jB/swfhj0UskHAgMSnNxzGII7u+RRrsC4akYHn8WtumjiH1w7R59
+         pwQP60UR4HFVnqiz7c+g4lHQxFxCLYcsa9WxqQrQWGxVZt7WzjFu3XlijMoUvo/Ie+C1
+         jYTCdt3GPF1OCs/9Xq1i1PUdlBQex68cSylZb0GXHvDFzHGuZX54dSlJV8GDRM8Pa5vd
+         Fnh2s5teYc7X03FCz+M3oVZQG1VZgLtu3NNvNHYJR4+Od+otP3kNZfg79M39lxo3Guig
+         BhyA==
+X-Forwarded-Encrypted: i=2; AJvYcCVB7oE7Zujlf9LMZnos0qtwXc0UwK0IDXy9n6IFqp9iiZWZIeeYw55jccvKuIgZOoCU8I+js+C1p9FxhibotMQMviYN2Q==@gmail.com
+X-Gm-Message-State: AOJu0YyHHzoSN/OCZ42fIJU3ixL3cdM5z8/rf+RNEheBKsz7ntISaylk
+	ITGMTtZTP1P4JeR66RArosNs6Ilw7qZEDw/DXUBOURqXMYSuKA7h4fPL+Lv06UAyLldlXg0ValS
+	RZMR2jOd2HRqYM2+4LzQomSe7VAnauMxkAAkqwoGZnREs5pKQl+vQ0ISND3ItAw==
+X-Received: by 2002:a17:90b:2e4b:b0:311:c939:c848 with SMTP id 98e67ed59e1d1-3127c106191mr16999899a91.0.1748890558322;
+        Mon, 02 Jun 2025 11:55:58 -0700 (PDT)
+X-Forwarded-To: ricardo.eric.carcamo@gmail.com
+X-Forwarded-For: ricardo.carcamo.cofre@gmail.com ricardo.eric.carcamo@gmail.com
+Delivered-To: ricardo.carcamo.cofre@gmail.com
+Received: by 2002:a05:6a21:699:b0:218:38c9:a255 with SMTP id lm25csp2989042pzb;
+        Mon, 2 Jun 2025 11:55:57 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGt6xh9GNOt5n0zwO4xzGIS52Z/VtlMLOdQSmgjRQCLrzlqlmXofR3/E+2K0AvKCDUxsEcW
+X-Received: by 2002:a05:6102:358d:b0:4db:154f:aa02 with SMTP id ada2fe7eead31-4e701baff3amr6502452137.1.1748890556820;
+        Mon, 02 Jun 2025 11:55:56 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1748890556; cv=none;
+        d=google.com; s=arc-20240605;
+        b=iFn++u2SFS8+aSRDP604GeEVuGBvIrHDrxm/zNnJx/n4vPgLcwymwIuFYWm60YWIhW
+         12Z5ps3uVaNQmw7lroGg6BqCBvN8oU8bbfZAius9NIQF5JCsn7h8sIOsRdFRuujaESGD
+         MxYcOjjeY9N4LC2FmcHY06QAE7ACV/g39SZ2qSRZFxY+7n0DxpanEyq+AMDA9LFcUfHT
+         QP6qdTZ9aepmWpu7RPCyCTgvhl+x/BeblSmFL11gNiHH/yRyX1P+QrOrEnCeJODOcVFI
+         XxNuRrIz4U7fCs7n/mXEJzUZ1Myihtj/CKLeOTePB60g8kQhgg0qodarpqozPtCq+GUT
+         xckg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:mime-version:subject:message-id:to:from
+         :date:dkim-signature;
+        bh=05dbZTWItA4ecFSxCA/p9SLjKzfKQkyf6VxmxDQx9aQ=;
+        fh=FvYumwWVjHOJTrrz9Ovl03LQv6KwTRxBTFPMUYZtbAY=;
+        b=P6UAgshBDOdZz9eZSKCjg/mpYv+mAHmy+FHv/rYd1e0QZtWOKmgxpF15Nx3EkxNwgd
+         v5tza8U7IGb7JaR8z7W9AVDk8EsL4EY0YzRx5QB2f1fE374p2qVE97tsQI3bKzQZkgyS
+         756FBSH6EflfQHMbrB1p9hixa2AwwXtPmzKoIYUzjLzwgmO3b9A+aEe5eWe+ThMbMUnz
+         8o8nB+9/gdwkVg2JArb13lES8CpFkdjJr7I4N5DpQYlbQIUgGnfS6isXkaW/88OCsYJB
+         wqLeKUC32416tgDG3pmKT1BehWLkWIc7UtF1Pfs2tR9V7LmUJv1pGBOKin9L8R56fyqN
+         vflQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@bci.cl header.s=mail1 header.b="VPfX/CzN";
+       spf=pass (google.com: domain of contacto@bci.cl designates 200.68.28.187 as permitted sender) smtp.mailfrom=contacto@bci.cl;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=bci.cl
+Return-Path: <contacto@bci.cl>
+Received: from data2.bci.cl (correo2.bci.cl. [200.68.28.187])
+        by mx.google.com with ESMTPS id ada2fe7eead31-4e64ea81656si3087762137.664.2025.06.02.11.55.56
+        for <ricardo.carcamo.cofre@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 02 Jun 2025 11:55:56 -0700 (PDT)
+Received-SPF: pass (google.com: domain of contacto@bci.cl designates 200.68.28.187 as permitted sender) client-ip=200.68.28.187;
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=bci.cl; i=@bci.cl; q=dns/txt; s=mail1; t=1748890556;
+  x=1780426556;
+  h=date:from:to:message-id:subject:mime-version:
+   content-transfer-encoding;
+  bh=bpb/HbAVY2R8uEIH2nk8jJsl2oNxrSeKvjOfpUVmZZU=;
+  b=VPfX/CzNAkLTIr7BmWMGySS24a0RTCoNx10rC+1QNBw4HNpgjTWRRKx7
+   mN92VisYTeHhytU2cjgd/Vaa3FENAZ6VZ2KRfQ9TuIL8xVuY99m+MsJzV
+   dVfVoK3XjXHZh9ey1fQT3AbO4x8aFl3+7RisL/cYoQtBq2UGE4kAJRxv3
+   QX/jDKwD+8f7C6vuXcpmxlKPOy4jGv5Bq1vbgCyGLSSUAkjtrPWH92qoU
+   /ISpx0uxFbtlKZXEvtNG311B1FNfbqWvphtNGIpK9arKmPgrDNyriONQV
+   fxjqyy0IxtdEwq2xbPVYFQbI26d1ErhLOOI25mylOFZ9FtKShXUY2FzLN
+   Q==;
+X-CSE-ConnectionGUID: g/zfMsnJTJKkW8k1gQVMAw==
+X-CSE-MsgGUID: 8+/A1tBmRjaPmP0WaXKY9Q==
+Received: from latiniam1.bci.cl (HELO latiniam1) ([161.131.55.173])
+  by data1.bci.cl with ESMTP; 02 Jun 2025 14:55:55 -0400
+Date: Mon, 2 Jun 2025 14:55:55 -0400 (GMT-04:00)
+From: contacto@bci.cl
+To: ricardo.carcamo.cofre@gmail.com
+Message-ID: <1064265476.3883865.1748890555927@latiniam1>
+Subject: =?ISO-8859-15?Q?Notificaci=F3n_de_uso_de_tu_tarjeta_de_cr=E9dito?=
+MIME-Version: 1.0
+Content-type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
+  <meta http-equiv="X-UA-Compatible">
+  <title>Notificaci&oacute;n uso TDC</title>
+  <link
+    href="https://fonts.googleapis.com/css?family=Overpass:100,100i,200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet">
+  <style type="text/css">
+    @media(max-width:767px) {
+      .d-block {
+        width: 100% !important;
+        text-align: center !important;
+        display: inline-block !important;
+        line-height: 170% !important;
+      }
+
+      .w-100 {
+        width: 100% !important;
+      }
+
+      .w-75 {
+        width: 75% !important;
+      }
+
+      .w-50 {
+        width: 50% !important;
+      }
+
+      .w-33 {
+        width: 33% !important;
+      }
+
+      .w-25 {
+        width: 25% !important;
+      }
+
+      .w-15 {
+        width: 15% !important;
+      }
+
+      .text-center {
+        text-align: center !important;
+      }
+
+      .text-left {
+        text-align: left !important;
+      }
+
+      .text-right {
+        text-align: right !important;
+      }
+
+      .text-justify {
+        text-align: justify !important;
+      }
+
+      .f-23 {
+        font-size: 23px !important;
+        line-height: 27px !important;
+      }
+
+      .pb-15 {
+        padding-bottom: 15px !important;
+      }
+
+      .d-none {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body style="padding:0; margin:0;">
+  <table width="100%" border="0" align="center" cellspacing="0" cellpadding="0" bgcolor="#f6f6f6">
+    <tbody>
+      <tr>
+        <td>
+          <!-- Mail Contenedor-->
+          <table class="contenedor-mail" border="0" align="center" cellpadding="0" cellspacing="0" width="600"
+            bgcolor="#ffffff" style="margin: 0 auto; font-family: Overpass, sans-serif; color: #5e5e5e;">
+            <tbody>
+              <!-- Header Mail -->
+              <tr>
+                <td>
+                  <img
+                    src="https://bci.modyocdn.com/uploads/328f1ee5-c3f4-4e26-804a-f9e33675d66a/original/Header_informativo-99.jpg"
+                    width="100%">
+                </td>
+              </tr>
+              <!-- Fin Header Mail -->
+              <!-- Info titulo -->
+              <tr>
+                <td>
+                  <table class="contenedor-bloque" border="0" align="center" cellpadding="0" cellspacing="0" width="80%"
+                    style="text-align: center;">
+                    <tbody>
+                       <tr>
+                           <td style="font-size: 18px; line-height: 24px; font-weight: 100; color: #546e7a;">
+                               Hola<br><b style="display:block;">RICARDO ERIC CARCAMO COFRE</b></td>
+                      </tr>
+                      
+                      
+                      <tr>
+                        <td class="parrafo f-23"
+                        style="font-size: 28px; line-height: 33px; padding-top: 10px; color: #37474f; text-align: center;
+                        font-weight: 100;
+                        font-family: Overpass, sans-serif;">
+                          Realizaste una<b> compra </b><br>con tu <b>
+                            tarjeta de cr&eacute;dito</b>.
+                        </td>
+                      </tr>
+                      
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <!-- Fin Info titulo -->
+
+				
+					<!-- Separador -->
+					<tr>
+				<td>
+				<table align="center" border="0" cellpadding="0" cellspacing="0" style="color: #546e7a; font-weight: 200; font-size: 14px; font-family: Overpass, sans-serif;" width="85%">
+ 
+  <tr>
+   <td colspan="4" height="20">
+   </td></tr><tr>
+   <td align="center" colspan="4">
+    <img src="https://image.info.bci.cl/lib/fe3d157075640678761576/m/2/dots-separador.png" width="10%"></td></tr><tr>
+   <td colspan="4" height="20">
+   </td></tr></table>
+				
+				</td>
+				</tr>
+				<!-- fin Separador -->
+				
+				
+				
+              <!-- tabla -->
+              <tr>
+                <td align="center" valign="top">
+                  <table class="table table-striped f-23" width="80%" style="border: solid 1px #0073cb; border-radius: 4px;padding: 8px; font-size: 16px; line-height: 20px; font-weight: 300;border-spacing: 0 2px;
+                      ">
+                    <tbody class="texto-mbl">
+                      <tr>
+                        <td class="d-block" width="50%" align="left" style="text-align: right; padding: 8px 15px;">
+                          N&uacute;mero tarjeta cr&eacute;dito</td>
+                        <td class="d-block" width="50%" align="left" style="padding: 8px 15px;">****1605</td>
+                      </tr>
+                      <tr style="background-color: #ebebec;">
+                        <td class="d-block" width="50%" align="left" style="text-align: right; padding: 10px 15px;">
+                          Monto</td>
+                        <td class="d-block" width="50%" align="left" style="padding: 10px 15px;">
+                          $86.174</td>
+                      </tr>
+                      <tr>
+                        <td class="d-block" width="50%" align="left" style="text-align: right;padding: 10px 15px;">Fecha
+                        </td>
+                        <td class="d-block" width="50%" align="left" style="padding: 10px 15px;">
+                          02/06/2025
+                        </td>
+                      </tr>
+                      <tr style="background-color: #ebebec;">
+                        <td class="d-block" width="50%" align="left" style="text-align: right; padding: 10px 15px;">
+                          Hora </td>
+                        <td class="d-block" width="50%" align="left" style="padding: 10px 15px;">
+                          14:55 horas
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="d-block" width="50%" align="left" style="text-align: right;padding: 10px 15px;">Comercio
+                        </td>
+                        <td class="d-block" width="50%" align="left" style="padding: 10px 15px;">
+                          INVERSIONES RF SPA       SANTIAGO     CL
+                        </td>
+                      </tr>
+                      <tr style="background-color: #ebebec;">
+                        <td class="d-block" width="50%" align="left" style="text-align: right; padding: 10px 15px;">
+                          Cuotas </td>
+                        <td class="d-block" width="50%" align="left" style="padding: 10px 15px;">
+                          0
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <!-- fin tabla -->
+
+
+
+              <!-- Info principal -->
+              <tr>
+                <td>
+                  <table class="contenedor-bloque" border="0" align="center" cellpadding="0" cellspacing="0" width="80%"
+                    style="text-align: center;">
+                    <tbody>
+
+                      <tr>
+                        <td height="25"></td>
+                      </tr>
+                     <!-- <tr>
+                        <td class="parrafo f-23"
+                          style="font-size: 16px; line-height: 23px; font-weight: 300; text-align: center;  ">
+                          Si no reconoces este movimiento, ll&aacute;manos al <b>600 692 8000</b>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td height="20"></td>
+                      </tr>-->
+                      <tr>
+                        <td class="parrafo f-23"
+                          style="font-size: 16px !important; line-height: 24px !important; font-weight: 300; text-align: center; letter-spacing: -0.03px;">
+                          Si no quieres recibir notificaciones en tu correo electr&oacute;nico puedes modificar
+                          tus preferencias en <b>Bci.cl</b> ingresando con tu RUT y clave, en la secci&oacute;n
+                          <b> Notificaciones</b>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td height="40"></td>
+                      </tr>
+                    <tbody>
+                  </table>
+                </td>
+              </tr>
+              <!-- Fin Info principal -->
+
+
+
+
+
+              <!-- Separador -->
+
+              <tr>
+                <td align="center">
+                  <img style="width: 50px;"
+                    src="https://bci.modyocdn.com/uploads/b9ce86dd-eb13-4a01-9da7-3b1b081d09f5/original/separador22.png">
+                </td>
+              </tr>
+
+              <!-- fin Separador -->
+
+              <!-- Footer -->
+              <tr>
+                <td>
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" style="font-family: Overpass, sans-serif; font-size: 16px;" width="100%">
+ 
+  <tr>
+   <td align="center" style="background: #fff; display: inline-block; line-height: 220%; color: #546e7a; font-weight: 200;" valign="middle" width="100%">
+    <img src="https://image.info.bci.cl/lib/fe3d157075640678761576/m/1/CC-AUC-Gen-C006-0919-logo-bci-animado.gif" width="22%"><br>
+    Cont&aacute;ctanos 600<font style="letter-spacing: -1px;color:#fff">.</font> 692<font style="letter-spacing: -1px;color:#fff">.</font> 8000<br>
+    <img src="https://image.info.bci.cl/lib/fe3d157075640678761576/m/1/CC-AUC-Gen-C006-0919-RRSS.gif" width="15%"><br>
+    <b>@BancoBci</b><br>
+    &nbsp;</td></tr><tr>
+   <td height="20">
+   </td></tr></table>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <table class="contenedor-bloque f-23" border="0" align="center" cellpadding="0" cellspacing="0"
+                    width="100%" style="background-color: #f6f6f6;">
+                    <tbody>
+                      <tr>
+                        <td height="20"
+                          style="background-color: #fff; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                        </td>
+                      </tr>
+                      <tr>
+                        <td height="20"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td bgcolor="#f6f6f6">
+                  <table class="contenedor-mail-seguro" border="0" align="center" cellpadding="0" cellspacing="0"
+                    bgcolor="#f6f6f6" width="90%">
+                    <tr>
+                      <td height="10"></td>
+                    </tr>
+                    <tr>
+                      <td class="icono-logo-seguro d-block" width="30%">
+                        <img
+                          src="https://bci.modyocdn.com/uploads/69b62a26-5006-4ad5-b6b8-faa4aba5d38a/original/correo-seguro.png"
+                          width="100%" class="w-50">
+                      </td>
+                      <td class="texto-seguro d-block text-left f-16" width="70%" align="left" valign="middle"
+                        style="font-size: 11px; line-height: 18px;">
+                        <ul>
+                          <li class="pb-15">Siempre escribe la direcci&oacute;n del sitio web directamente en el
+                            navegador.</li>
+                          <li class="pb-15">Nunca solicitaremos tus claves, n&uacute;meros de tarjeta, BciPass o
+                            Multipass, por tel&eacute;fono o correo electr&oacute;nico.</li>
+                          <li class="pb-15">No debes abrir o descargar archivos de remitentes desconocidos.</li>
+                          <li class="pb-15">Solo descarga Apps Bci desarrolladas por Banco Cr&eacute;dito e Inversiones.
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td height="30"></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <!-- Fin footer -->
+              <!-- Legales Mail -->
+              <tr>
+                <td>
+                  <table border="0" align="center" cellpadding="0" cellspacing="0" bgcolor="#f6f6f6" width="100%">
+                    <tr>
+                      <td bgcolor="f6f6f6">
+                        <table class="contenedor-legales-mail" border="0" align="center" cellpadding="0" cellspacing="0"
+                          width="95%">
+                          <tr>
+                            <td class="texto-legal-footer f-16" align="justify" valign="top"
+                              style="font-size: 12px; line-height: 130%; font-weight: 300; padding-bottom: 8px;">
+                              Inf&oacute;rmate sobre la garant&iacute;a estatal de los dep&oacute;sitos en tu banco o en
+                              <b>www.cmfchile<span style="letter-spacing:-6px"> </span>.cl</b>. Para mayor
+                              informaci&oacute;n visita <b>www.bci <span style="letter-spacing:-6px">  </span>.cl</b>.
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    <tr>
+                      <td height="30"></td>
+                    </tr>
+              </tr>
+          </table>
+        </td>
+      </tr>
+      <!-- Fin legales Mail -->
+    </tbody>
+  </table>
+  <!-- fin Mail Contenedor-->
+  </td>
+  </tr>
+  </tbody>
+  </table>
+</body>
+
+</html>
