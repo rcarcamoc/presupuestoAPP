@@ -39,7 +39,7 @@ android {
                 artifactType = "APK"
                 testers = "aranthalion@gmail.com, ricardo.eric.carcamo@gmail.com"
                 releaseNotes = "Versión con login por correo directo (POP3/IMAP) y sin login de Google."
-                serviceCredentialsFile = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-ad5cc11bd5.json").path
+                serviceCredentialsFile = rootProject.file("finanzaspersonales-461602-firebase-adminsdk-fbsvc-db10ddcf97.json").path
             }
         }
     }
