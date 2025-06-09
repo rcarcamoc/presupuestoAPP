@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aranthalion.presupuesto.data.repository.UserPreferencesRepository
 import com.aranthalion.presupuesto.util.AppLogger
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +44,7 @@ class AuthViewModel @Inject constructor(
     
     init {
         AppLogger.d("AuthViewModel: init block.")
-        // Cargar detalles de conexión guardados al iniciar (se hará en LoginScreen para pre-rellenar)
+        FirebaseCrashlytics.getInstance().setCustomKey("last_init_time", System.currentTimeMillis())
     }
     
     fun isUserSignedIn(): Boolean {
@@ -54,41 +55,65 @@ class AuthViewModel @Inject constructor(
     fun signOut() {
         AppLogger.i("AuthViewModel: signOut() llamado.")
         viewModelScope.launch {
-                        _userEmail.value = null
-                        _userName.value = null
-                        _error.value = null
+            _userEmail.value = null
+            _userName.value = null
+            _error.value = null
             _unreadEmailCount.value = null
-            _isLoading.value = false // Asegurar que isLoading se resetee
-            // Considerar si se deben limpiar las preferencias guardadas aquí o dar una opción al usuario
-            // userPreferencesRepository.clearEmailConnectionDetails() 
-            AppLogger.i("AuthViewModel: Usuario cerró sesión.")
+            _isLoading.value = false
+            FirebaseCrashlytics.getInstance().log("Usuario cerró sesión: ${_userEmail.value}")
         }
     }
 
     fun loginWithEmailProvider(email: String, password: String, serverType: String, serverAddress: String, port: Int, encryption: String) {
         AppLogger.i("AuthViewModel: loginWithEmailProvider llamado para $email, Servidor: $serverType $serverAddress:$port, Cifrado: $encryption")
+        
+        // Registrar información para Crashlytics
+        FirebaseCrashlytics.getInstance().apply {
+            setCustomKey("email_domain", email.substringAfter("@"))
+            setCustomKey("server_type", serverType)
+            setCustomKey("server_address", serverAddress)
+            setCustomKey("server_port", port)
+            setCustomKey("encryption_type", encryption)
+            log("Iniciando conexión de correo")
+        }
+        
         viewModelScope.launch {
             _isLoading.value = true
-            _error.value = null // Limpiar error anterior
-            _unreadEmailCount.value = null // Limpiar contador anterior
+            _error.value = null
+            _unreadEmailCount.value = null
             try {
                 val count = connectAndCountUnreadEmails(email, password, serverType, serverAddress, port, encryption)
                 _userEmail.value = email
                 _userName.value = email.substringBefore('@')
                 _unreadEmailCount.value = count
                 AppLogger.i("AuthViewModel: Conexión exitosa. Usuario: $email, Correos no leídos: $count")
+                FirebaseCrashlytics.getInstance().log("Conexión exitosa - Correos no leídos: $count")
             } catch (e: MessagingException) {
                 AppLogger.e("AuthViewModel: Error de mensajería", e)
                 _error.value = "Error de correo: ${e.message}"
+                FirebaseCrashlytics.getInstance().apply {
+                    recordException(e)
+                    setCustomKey("error_type", "messaging")
+                    setCustomKey("error_message", e.message ?: "Unknown")
+                }
             } catch (e: IllegalArgumentException) {
                 AppLogger.e("AuthViewModel: Argumento ilegal", e)
                 _error.value = "Configuración inválida: ${e.message}"
-            }
-            catch (e: Exception) {
+                FirebaseCrashlytics.getInstance().apply {
+                    recordException(e)
+                    setCustomKey("error_type", "configuration")
+                    setCustomKey("error_message", e.message ?: "Unknown")
+                }
+            } catch (e: Exception) {
                 AppLogger.e("AuthViewModel: Error desconocido en loginWithEmailProvider", e)
                 _error.value = "Error inesperado: ${e.message}"
+                FirebaseCrashlytics.getInstance().apply {
+                    recordException(e)
+                    setCustomKey("error_type", "unknown")
+                    setCustomKey("error_message", e.message ?: "Unknown")
+                }
             } finally {
-                _isLoading.value = false // Asegurar que isLoading se apague
+                _isLoading.value = false
             }
         }
     }
@@ -102,87 +127,179 @@ class AuthViewModel @Inject constructor(
             props["mail.$protocol.host"] = host
             props["mail.$protocol.port"] = port.toString()
             props["mail.$protocol.auth"] = "true"
-            // Timeouts (en milisegundos)
-            props["mail.$protocol.connectiontimeout"] = "60000" // 1 minuto
-            props["mail.$protocol.timeout"] = "60000" // 1 minuto
+            props["mail.$protocol.connectiontimeout"] = "60000"
+            props["mail.$protocol.timeout"] = "60000"
 
             // Configuración de cifrado
             when (encryption) {
                 "SSL/TLS" -> {
                     props["mail.$protocol.ssl.enable"] = "true"
-                    if (protocol == "pop3") { // POP3S
+                    if (protocol == "pop3") {
                         props["mail.pop3.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
                         props["mail.pop3.socketFactory.fallback"] = "false"
                         props["mail.pop3.socketFactory.port"] = port.toString()
-                    } else if (protocol == "imap") { // IMAPS
-                         props["mail.imap.ssl.trust"] = "*" // Confiar en todos los certificados SSL (considerar la seguridad para producción)
+                    } else if (protocol == "imap") {
+                        props["mail.imap.ssl.trust"] = "*"
                     }
                 }
                 "STARTTLS" -> {
                     props["mail.$protocol.starttls.enable"] = "true"
-                     if (protocol == "imap") {
-                         props["mail.imap.starttls.required"] = "true" // Opcional, pero más seguro
+                    if (protocol == "imap") {
+                        props["mail.imap.starttls.required"] = "true"
                     }
                 }
                 "None" -> {
                     AppLogger.w("Conexión sin cifrado seleccionada para $protocol")
+                    FirebaseCrashlytics.getInstance().log("Advertencia: Conexión sin cifrado para $protocol")
                 }
                 else -> {
-                    AppLogger.e("Tipo de cifrado no soportado: $encryption")
-                    throw IllegalArgumentException("Tipo de cifrado no soportado: $encryption")
+                    val error = "Tipo de cifrado no soportado: $encryption"
+                    AppLogger.e(error)
+                    FirebaseCrashlytics.getInstance().log(error)
+                    throw IllegalArgumentException(error)
                 }
             }
             
-            // Ajustes específicos de protocolo (store.protocol)
-             if (protocol == "imap") {
+            if (protocol == "imap") {
                 props["mail.store.protocol"] = if(encryption == "SSL/TLS") "imaps" else "imap"
             } else if (protocol == "pop3") {
-                 props["mail.store.protocol"] = if(encryption == "SSL/TLS") "pop3s" else "pop3"
+                props["mail.store.protocol"] = if(encryption == "SSL/TLS") "pop3s" else "pop3"
             }
 
             AppLogger.d("Propiedades de JavaMail: $props")
+            FirebaseCrashlytics.getInstance().log("Configuración de conexión: $props")
 
             val session = Session.getInstance(props, null)
-            // session.debug = true // Habilitar para depuración detallada de JavaMail
-
             var store: Store? = null
             var inbox: Folder? = null
+            
             try {
                 store = session.getStore(props["mail.store.protocol"] as String? ?: protocol)
                 AppLogger.d("Intentando conectar a $host:$port como $email con protocolo ${store.urlName}")
-                store.connect(email, pass) // El host y puerto ya están en las propiedades para connect
-                AppLogger.i("Conectado exitosamente al servidor ${props["mail.store.protocol"]}")
-
-                inbox = store.getFolder("INBOX")
-                inbox.open(Folder.READ_ONLY)
+                FirebaseCrashlytics.getInstance().log("Iniciando conexión al servidor")
                 
-                val unreadCount = inbox.unreadMessageCount
-                AppLogger.i("Número de mensajes no leídos: $unreadCount")
-                return@withContext unreadCount
+                try {
+                    store.connect(email, pass)
+                    AppLogger.i("Conectado exitosamente al servidor ${props["mail.store.protocol"]}")
+                    FirebaseCrashlytics.getInstance().log("Conexión al servidor exitosa")
+                } catch (e: MessagingException) {
+                    val errorMessage = when {
+                        e.message?.contains("AuthenticationFailedException") == true -> 
+                            "Credenciales incorrectas. Por favor, verifica tu correo y contraseña."
+                        e.message?.contains("ConnectException") == true -> 
+                            "No se pudo conectar al servidor. Verifica la dirección y el puerto."
+                        e.message?.contains("SSLHandshakeException") == true -> 
+                            "Error de SSL/TLS. Verifica la configuración de cifrado."
+                        else -> "Error al conectar: ${e.message}"
+                    }
+                    FirebaseCrashlytics.getInstance().apply {
+                        recordException(e)
+                        setCustomKey("connection_error", errorMessage)
+                    }
+                    throw MessagingException(errorMessage, e)
+                }
+
+                try {
+                    inbox = store.getFolder("INBOX")
+                    AppLogger.d("Intentando abrir buzón INBOX")
+                    FirebaseCrashlytics.getInstance().log("Abriendo buzón INBOX")
+                    
+                    // Verificar si el buzón existe
+                    if (!inbox.exists()) {
+                        val error = "El buzón INBOX no existe en la cuenta"
+                        AppLogger.e(error)
+                        FirebaseCrashlytics.getInstance().log(error)
+                        throw MessagingException(error)
+                    }
+
+                    // Obtener información del buzón antes de abrirlo
+                    val totalMessages = inbox.messageCount
+                    AppLogger.d("Total de mensajes en el buzón: $totalMessages")
+                    FirebaseCrashlytics.getInstance().log("Total de mensajes en el buzón: $totalMessages")
+
+                    // Abrir el buzón
+                    inbox.open(Folder.READ_ONLY)
+                    AppLogger.d("Buzón INBOX abierto exitosamente")
+                    
+                    // Obtener el conteo de mensajes no leídos
+                    val unreadCount = inbox.unreadMessageCount
+                    AppLogger.i("Número de mensajes no leídos: $unreadCount")
+                    FirebaseCrashlytics.getInstance().log("Correos no leídos encontrados: $unreadCount")
+
+                    // Verificar si el conteo es válido
+                    if (unreadCount < 0) {
+                        val error = "Conteo de mensajes no leídos inválido: $unreadCount"
+                        AppLogger.e(error)
+                        FirebaseCrashlytics.getInstance().log(error)
+                        throw MessagingException(error)
+                    }
+
+                    // Obtener información adicional para diagnóstico
+                    val flags = inbox.permanentFlags
+                    AppLogger.d("Flags disponibles en el buzón: $flags")
+                    FirebaseCrashlytics.getInstance().log("Flags disponibles en el buzón: $flags")
+
+                    // Verificar si el buzón soporta la bandera de no leído
+                    if (!flags.contains(javax.mail.Flags.Flag.SEEN)) {
+                        val warning = "El buzón no soporta la bandera de mensajes leídos/no leídos"
+                        AppLogger.w(warning)
+                        FirebaseCrashlytics.getInstance().log(warning)
+                    }
+
+                    return@withContext unreadCount
+                } catch (e: MessagingException) {
+                    val errorMessage = when {
+                        e.message?.contains("FolderNotFoundException") == true -> 
+                            "No se encontró el buzón de entrada. Verifica que la cuenta tenga acceso al correo."
+                        e.message?.contains("AuthenticationFailedException") == true ->
+                            "Error de autenticación al acceder al buzón. Verifica las credenciales."
+                        else -> "Error al acceder al buzón: ${e.message}"
+                    }
+                    AppLogger.e("Error al acceder al buzón: $errorMessage", e)
+                    FirebaseCrashlytics.getInstance().apply {
+                        recordException(e)
+                        setCustomKey("inbox_error", errorMessage)
+                        log("Error detallado al acceder al buzón: ${e.message}")
+                    }
+                    throw MessagingException(errorMessage, e)
+                }
             } catch (e: NoSuchProviderException) {
-                AppLogger.e("Proveedor no encontrado para $protocol o ${props["mail.store.protocol"]}", e)
-                throw MessagingException("Proveedor de servicio no encontrado: ${props["mail.store.protocol"]}", e)
+                val error = "Proveedor no encontrado para $protocol o ${props["mail.store.protocol"]}"
+                AppLogger.e(error, e)
+                FirebaseCrashlytics.getInstance().apply {
+                    recordException(e)
+                    setCustomKey("provider_error", error)
+                }
+                throw MessagingException(error, e)
             } catch (e: MessagingException) {
                 AppLogger.e("Error de mensajería al conectar o leer el buzón", e)
-                throw e 
+                FirebaseCrashlytics.getInstance().recordException(e)
+                throw e
             } catch (e: Exception) {
-                AppLogger.e("Error inesperado en connectAndCountUnreadEmails", e)
-                throw RuntimeException("Error inesperado durante la conexión al correo.", e)
+                val error = "Error inesperado durante la conexión al correo: ${e.message}"
+                AppLogger.e(error, e)
+                FirebaseCrashlytics.getInstance().apply {
+                    recordException(e)
+                    setCustomKey("unexpected_error", error)
+                }
+                throw RuntimeException(error, e)
             } finally {
                 try {
                     inbox?.close(false)
                     store?.close()
                     AppLogger.d("Conexiones de correo cerradas.")
+                    FirebaseCrashlytics.getInstance().log("Conexiones de correo cerradas correctamente")
                 } catch (e: MessagingException) {
                     AppLogger.e("Error al cerrar conexiones de correo", e)
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
             }
         }
     }
 
     // Funciones para UserPreferencesRepository
-    suspend fun saveLastConnectionDetails(details: com.aranthalion.presupuesto.data.repository.EmailConnectionDetails) {
-        userPreferencesRepository.saveEmailConnectionDetails(details)
+    suspend fun saveLastConnectionDetails(details: com.aranthalion.presupuesto.data.repository.EmailConnectionDetails, rememberPassword: Boolean = false) {
+        userPreferencesRepository.saveEmailConnectionDetails(details, rememberPassword)
     }
 
     suspend fun loadLastConnectionDetails(): com.aranthalion.presupuesto.data.repository.EmailConnectionDetails? {

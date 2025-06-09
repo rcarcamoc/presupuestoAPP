@@ -3,13 +3,18 @@ package com.aranthalion.presupuesto
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,7 +35,19 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    Column {
+                        // Botón de prueba de crash
+                        Button(
+                            onClick = { 
+                                throw RuntimeException("Test Crash") // Forzar un crash
+                            },
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(text = "Test Crash")
+                        }
+                        
+                        AppNavigation()
+                    }
                 }
             }
         }

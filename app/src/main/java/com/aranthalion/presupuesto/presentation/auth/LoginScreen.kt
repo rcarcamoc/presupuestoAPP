@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.aranthalion.presupuesto.data.repository.EmailConnectionDetails
 import kotlinx.coroutines.launch
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 // --- Definiciones de Preajustes ---
 data class ServerPreset(
@@ -63,6 +64,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
+    val crashlytics = FirebaseCrashlytics.getInstance()
     // Usar el isLoading del ViewModel
     val isLoading by viewModel.isLoading.collectAsState()
     val errorViewModel by viewModel.error.collectAsState()
@@ -73,6 +75,7 @@ fun LoginScreen(
     var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var rememberPassword by remember { mutableStateOf(false) }
     var serverTypeState by remember { mutableStateOf("IMAP") }
     var encryptionTypeState by remember { mutableStateOf("SSL/TLS") }
     var serverAddress by remember { mutableStateOf("mail.cock.li") }
@@ -221,6 +224,22 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isLoading
             )
+
+            // Checkbox para recordar contraseña
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = rememberPassword,
+                    onCheckedChange = { rememberPassword = it },
+                    enabled = !isLoading
+                )
+                Text(
+                    text = "Recordar contraseña",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
             
             Text("Configuración Manual (Avanzado)", style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp))
 
@@ -306,11 +325,12 @@ fun LoginScreen(
                             serverAddress = serverAddress,
                             serverPort = serverPort,
                             serverType = serverTypeState,
-                            encryptionType = encryptionTypeState
+                            encryptionType = encryptionTypeState,
+                            password = passwordInput
                         )
                         coroutineScope.launch {
-                            viewModel.saveLastConnectionDetails(detailsToSave)
-                            AppLogger.d("LoginScreen: Detalles guardados: $detailsToSave")
+                            viewModel.saveLastConnectionDetails(detailsToSave, rememberPassword)
+                            AppLogger.d("LoginScreen: Detalles guardados: $detailsToSave, Recordar contraseña: $rememberPassword")
                             viewModel.loginWithEmailProvider(
                                 email = emailInput,
                                 password = passwordInput, 
@@ -326,6 +346,25 @@ fun LoginScreen(
                 ) {
                     Text("Conectar y Contar Correos")
                 }
+            }
+
+            // Botón para enviar logs a Crashlytics
+            Button(
+                onClick = {
+                    crashlytics.log("Enviando logs de diagnóstico a Crashlytics")
+                    crashlytics.setCustomKey("email_input", emailInput)
+                    crashlytics.setCustomKey("server_type", serverTypeState)
+                    crashlytics.setCustomKey("server_address", serverAddress)
+                    crashlytics.setCustomKey("server_port", serverPort)
+                    crashlytics.setCustomKey("encryption_type", encryptionTypeState)
+                    crashlytics.recordException(Exception("Log de diagnóstico enviado manualmente"))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Text("Enviar Logs a Crashlytics")
             }
 
             errorViewModel?.let {

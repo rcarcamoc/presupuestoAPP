@@ -464,3 +464,56 @@ Se ha optimizado el script `compile.sh` para mejorar la gestión de daemons y au
 1. Monitorear el rendimiento del script en uso diario
 2. Considerar agregar opciones de compilación personalizadas
 3. Evaluar la necesidad de flags adicionales para debug/release 
+
+### 2024-03-19 - Mejoras en la Conexión IMAP y Crashlytics
+**Tipo:** Mejora/Seguridad
+**Responsable:** Equipo de desarrollo
+
+**Descripción:**
+Se implementaron mejoras significativas en la conexión IMAP y el sistema de reportes de errores:
+
+1. Correcciones en EmailService:
+   - Eliminación de DummySSLSocketFactory inseguro
+   - Implementación de SSL/TLS estándar
+   - Configuración correcta de propiedades IMAP
+   - Soporte para OAuth2
+   - Mejora en el manejo de errores
+
+2. Integración avanzada de Crashlytics:
+   - Logs detallados de conexión IMAP
+   - Custom keys para diagnóstico
+   - Botón de envío manual de logs
+   - Monitoreo de métricas de conexión
+   - Manejo de errores específicos
+
+3. Mejoras de seguridad:
+   - Eliminación de credenciales hardcodeadas
+   - Implementación de SSL/TLS seguro
+   - Soporte para autenticación OAuth2
+   - Validación de certificados SSL
+
+**Detalles técnicos:**
+1. Configuración IMAP actualizada:
+   ```kotlin
+   props.put("mail.imaps.ssl.enable", "true")
+   props.put("mail.imaps.auth.mechanisms", "XOAUTH2")
+   ```
+
+2. Integración Crashlytics:
+   ```kotlin
+   crashlytics.log("Iniciando conexión IMAP")
+   crashlytics.setCustomKey("server_type", serverType)
+   crashlytics.recordException(e)
+   ```
+
+**Siguientes pasos:**
+1. Implementar sistema de usuarios
+2. Agregar encriptación de credenciales
+3. Mejorar la interfaz de configuración
+4. Implementar pruebas de conexión en tiempo real
+5. Configurar alertas en Crashlytics
+
+**Notas adicionales:**
+- Se requiere probar la conexión con diferentes proveedores de correo
+- Considerar implementar contraseñas de aplicación para Gmail
+- Evaluar la necesidad de soporte para más proveedores de correo 
